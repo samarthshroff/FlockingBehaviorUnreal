@@ -3,11 +3,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Actor.h"
+#include "GameFramework/Pawn.h"
+#include "GameFramework/SpringArmComponent.h"
+#include "Camera/CameraComponent.h"
 #include "GameManager.generated.h"
 
 UCLASS()
-class FLOCKINGBEHAVIOR_API AGameManager : public AActor
+class FLOCKINGBEHAVIOR_API AGameManager : public APawn
 {
 	GENERATED_BODY()
 	
@@ -16,7 +18,13 @@ public:
 	AGameManager();
 
 	UPROPERTY(VisibleAnywhere, BlueprintreadOnly)
+	USceneComponent* RootComp;
 
+	UPROPERTY(VisibleAnywhere, BlueprintreadOnly)
+	USpringArmComponent* SpringArm;
+
+	UPROPERTY(VisibleAnywhere, BlueprintreadOnly)
+	UCameraComponent* Camera;
 
 protected:
 	// Called when the game starts or when spawned
