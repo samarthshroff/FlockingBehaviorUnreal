@@ -6,6 +6,7 @@
 #include "GameFramework/Pawn.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
+#include "Flock.h"
 #include "GameManager.generated.h"
 
 UCLASS()
@@ -26,12 +27,10 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintreadOnly)
 	UCameraComponent* Camera;
 
+	UPROPERTY()
+	UFlock* Flock;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-
 };
