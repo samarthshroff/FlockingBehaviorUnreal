@@ -16,6 +16,9 @@ ABoid::ABoid()
 
 	Mesh = CreateDefaultSubobject<UStaticMeshComponent>("StaticMeshComponent");
 	Mesh->SetupAttachment(RootComponent);
+
+	//OnActorHit
+	//>OnComponentHit.AddDynamic(this, &ABullet::OnHit);
 }
 
 // Called when the game starts or when spawned
