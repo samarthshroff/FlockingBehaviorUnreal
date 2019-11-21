@@ -1,0 +1,10 @@
+{
+	"files.exclude": {
+		"E:/Projects/Personal/Unreal/FlockingBehavior/.git": true,
+		"E:/Projects/Personal/Unreal/FlockingBehavior/.vs": true,
+		"E:/Projects/Personal/Unreal/FlockingBehavior/.vscode": true,
+		"E:/Projects/Personal/Unreal/FlockingBehavior/Content": true,
+		"E:/Projects/Personal/Unreal/FlockingBehavior/Intermediate": true,
+		"E:/Projects/Personal/Unreal/FlockingBehavior/Saved": true
+	}
+}
