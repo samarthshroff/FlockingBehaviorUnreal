@@ -502,10 +502,10 @@
                 "D:\\Epic Games\\UE_4.23\\Engine\\Source\\ThirdParty\\PhysX3\\APEX_1.4\\shared\\internal\\include",
                 "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\VC\\Tools\\MSVC\\14.16.27023\\INCLUDE",
                 "C:\\Program Files (x86)\\Windows Kits\\NETFXSDK\\4.6.1\\include\\um",
-                "C:\\Program Files (x86)\\Windows Kits\\10\\include\\10.0.17763.0\\ucrt",
-                "C:\\Program Files (x86)\\Windows Kits\\10\\include\\10.0.17763.0\\shared",
-                "C:\\Program Files (x86)\\Windows Kits\\10\\include\\10.0.17763.0\\um",
-                "C:\\Program Files (x86)\\Windows Kits\\10\\include\\10.0.17763.0\\winrt"
+                "C:\\Program Files (x86)\\Windows Kits\\10\\include\\10.0.18362.0\\ucrt",
+                "C:\\Program Files (x86)\\Windows Kits\\10\\include\\10.0.18362.0\\shared",
+                "C:\\Program Files (x86)\\Windows Kits\\10\\include\\10.0.18362.0\\um",
+                "C:\\Program Files (x86)\\Windows Kits\\10\\include\\10.0.18362.0\\winrt"
             ],
             "intelliSenseMode": "msvc-x64",
             "defines": [
@@ -806,7 +806,26 @@
                 "CLOTHINGSYSTEMRUNTIMEINTERFACE_API=",
                 "FLOCKINGBEHAVIOR_VTABLE=DLLEXPORT_VTABLE",
                 "FLOCKINGBEHAVIOR_API="
-            ]
+            ],
+            "compilerPath": "C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/VC/Tools/MSVC/14.23.28105/bin/Hostx64/x64/cl.exe",
+            "cStandard": "c11",
+            "cppStandard": "c++17"
+        },
+        {
+            "name": "UnrealEngineConfig",
+            "includePath": [
+                "${workspaceFolder}/**"
+            ],
+            "defines": [
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE"
+            ],
+            "windowsSdkVersion": "10.0.18362.0",
+            "compilerPath": "C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/VC/Tools/MSVC/14.23.28105/bin/Hostx64/x64/cl.exe",
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "msvc-x64"
         }
     ],
     "version": 4

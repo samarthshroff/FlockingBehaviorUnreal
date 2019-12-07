@@ -16,9 +16,6 @@ ABoid::ABoid()
 
 	Mesh = CreateDefaultSubobject<UStaticMeshComponent>("StaticMeshComponent");
 	Mesh->SetupAttachment(RootComponent);
-
-	//OnActorHit
-	//>OnComponentHit.AddDynamic(this, &ABullet::OnHit);
 }
 
 // Called when the game starts or when spawned
@@ -26,6 +23,10 @@ void ABoid::BeginPlay()
 {
 	Super::BeginPlay();
 
+	FScriptDelegate scriptDelegate;
+	scriptDelegate.BindUFunction(this,FName("OnActorOverlap"));
+	OnActorBeginOverlap.Add(scriptDelegate);
+	
 	float magnitude;
 	DirectionVector.ToDirectionAndLength(DirectionVector, magnitude);
 
@@ -68,3 +69,7 @@ void ABoid::Tick(float DeltaTime)
 
 }
 
+void ABoid::OnActorOverlap(AActor* SelfActor, AActor* OtherActor, FVector NormalImpulse, const FHitResult& Hit)
+{
+	UE_LOG(FlockingBehaviorLogs,Warning,TEXT("self actor %s hit with: %s"), *(SelfActor->GetFullName()), *(OtherActor->GetFullName()));
+}
