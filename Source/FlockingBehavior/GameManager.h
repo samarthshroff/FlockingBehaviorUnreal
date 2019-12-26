@@ -13,24 +13,32 @@ UCLASS()
 class FLOCKINGBEHAVIOR_API AGameManager : public APawn
 {
 	GENERATED_BODY()
-	
-public:	
+
+public:
 	// Sets default values for this actor's properties
 	AGameManager();
 
 	UPROPERTY(VisibleAnywhere, BlueprintreadOnly)
-	USceneComponent* RootComp;
+	USceneComponent *RootComp;
 
 	UPROPERTY(VisibleAnywhere, BlueprintreadOnly)
-	USpringArmComponent* SpringArm;
+	USpringArmComponent *SpringArm;
 
 	UPROPERTY(VisibleAnywhere, BlueprintreadOnly)
-	UCameraComponent* Camera;
+	UCameraComponent *Camera;
 
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere, BlueprintreadOnly)
 	UFlock* Flock;
+
+private:
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class ABoid> _boidBPClass;
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+public:
+	// Called every frame
+	void Tick(float DeltaTime) override;
 };

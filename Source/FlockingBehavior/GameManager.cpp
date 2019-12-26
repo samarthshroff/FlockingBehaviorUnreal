@@ -7,7 +7,7 @@
 AGameManager::AGameManager()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bCanEverTick = true;
 
 	RootComp = CreateDefaultSubobject<USceneComponent>("Root");
 	RootComponent = RootComp;
@@ -19,10 +19,22 @@ AGameManager::AGameManager()
 	Camera->SetupAttachment(SpringArm);
 
 	Flock = CreateDefaultSubobject<UFlock>("Flock");
+	AddInstanceComponent(Flock);
 }
 
 // Called when the game starts or when spawned
 void AGameManager::BeginPlay()
 {
-	Super::BeginPlay();	
+	Super::BeginPlay();
+
+	//this needs to be in BeginPlay because values set from editor are initliazed after the constructor is called.
+	Flock->Initialize(this, _boidBPClass);
+}
+
+void AGameManager::Tick(float DeltaTime)
+{
+	if(Flock != nullptr)
+	{
+		Flock->TickComponent(DeltaTime);
+	}
 }

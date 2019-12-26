@@ -9,7 +9,7 @@
 
 DECLARE_LOG_CATEGORY_EXTERN(FlockingBehaviorLogs, Log, All)
 
-UCLASS()
+UCLASS(Blueprintable)
 class FLOCKINGBEHAVIOR_API ABoid : public AActor
 {
 	GENERATED_BODY()
@@ -24,16 +24,18 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintreadOnly)
 	UStaticMeshComponent* Mesh;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Boid")
-	FVector DirectionVector;
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Boid")
+	//FVector DirectionVector;
 
-	//current speed by which each boid moves
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Boid")
-	float Speed;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Boid", meta=(Tooltip="Angle in degrees."))
+	float DirectionAngle;
 
-	//All other boids within this radius are the neighbors
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Boid")
-	float NeighborRadius;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flock", meta = (Tooltip = "Length of Ray cast (in cms) for checking forward collision with World Static objects, so that the boid can turn accordingly."))
+	float FarSightness;
+
+	////current speed by which each boid moves
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Boid")
+	//float Speed;
 
 	//The Speed variable will never cross this limit
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Boid")
@@ -43,10 +45,22 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Boid")
 	float MaxSteeringForce;
 
+	FVector GetDirectionVector();
+
 private:
 
 	//speed * direction vector
+	UPROPERTY()
 	FVector _velocity;
+
+	UPROPERTY()
+	FVector _actorBounds;
+
+	UPROPERTY()
+	UWorld* _world;
+
+	UPROPERTY()
+	FVector _directionVector;
 
 protected:
 	// Called when the game starts or when spawned
@@ -54,9 +68,17 @@ protected:
 
 public:	
 	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+	void Tick(float DeltaTime, float alignmentAngle, FVector cohesion, FVector separation);
 
- UFUNCTION()
-    void OnActorOverlap(AActor* SelfActor, AActor* OtherActor, FVector NormalImpulse, const FHitResult& Hit);
+//  UFUNCTION()
+//     void OnActorOverlap(AActor* SelfActor, AActor* OtherActor, FVector NormalImpulse, const FHitResult& Hit);
 	
 };
+
+//USTRUCT()
+//struct FNeighborData
+//{
+//	float DirectionAngle;
+//	FVector Location;
+//	float Distance;
+//};

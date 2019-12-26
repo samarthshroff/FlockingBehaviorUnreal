@@ -6,11 +6,12 @@
 		},
 		{
 			"name": "UE4",
-			"path": "D:\\Epic Games\\UE_4.23"
+			"path": "D:\\Epic Games\\UE_4.24"
 		}
 	],
 	"settings": {
-		"typescript.tsc.autoDetect": "off"
+		"typescript.tsc.autoDetect": "off",
+		"workbench.editor.restoreViewState": false
 	},
 	"extensions": {
 		"recommendations": [
