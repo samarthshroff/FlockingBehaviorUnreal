@@ -57,7 +57,7 @@ void ABoid::Tick(float DeltaTime, float alignmentAngle, FVector cohesion, FVecto
 {
 	//Super::Tick(DeltaTime);
 
-	if (alignmentAngle != 0.0f)	DirectionAngle = alignmentAngle;// -DirectionAngle;
+	 DirectionAngle = alignmentAngle;// -DirectionAngle;
 
 	_directionVector.X = FMath::Cos(FMath::DegreesToRadians(DirectionAngle));
 	_directionVector.Y = FMath::Sin(FMath::DegreesToRadians(DirectionAngle));
@@ -94,7 +94,7 @@ void ABoid::Tick(float DeltaTime, float alignmentAngle, FVector cohesion, FVecto
 		}
 	}
 	
-	_velocity = _directionVector + cohesion + separation;
+	_velocity = _directionVector;// +cohesion + separation;// 
 		 
 	FVector displacement = _velocity * DeltaTime;
 

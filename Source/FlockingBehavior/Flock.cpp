@@ -55,10 +55,10 @@ void UFlock::Initialize(class AActor* boidsOwner, TSubclassOf<class ABoid> boidB
 		params.Owner = _boidOwner;
 		params.Name = FName(*name);
 
-		transform = FTransform(FVector(-3160.0f, 450.0f, 250.0f));
+		transform = FTransform(FVector(-3160.0f, 400.0f, 250.0f));
 		boid = world->SpawnActor<ABoid>(_boidBPClass, transform, params);
 		boid->SetActorLabel(name);
-		boid->DirectionAngle = 0.0f;
+		boid->DirectionAngle = -15.0f;
 
 		AddBoidToArray(boid);
 
@@ -70,7 +70,7 @@ void UFlock::Initialize(class AActor* boidsOwner, TSubclassOf<class ABoid> boidB
 		transform = FTransform(FVector(-3160.0f, 200.0f, 250.0f));
 		boid = world->SpawnActor<ABoid>(_boidBPClass, transform, params);
 		boid->SetActorLabel(name);
-		boid->DirectionAngle = 0.0f;
+		boid->DirectionAngle = 1.0f;
 
 		AddBoidToArray(boid);
 
@@ -82,7 +82,7 @@ void UFlock::Initialize(class AActor* boidsOwner, TSubclassOf<class ABoid> boidB
 		transform = FTransform(FVector(-3160.0f, -200.0f, 250.0f));
 		boid = world->SpawnActor<ABoid>(_boidBPClass, transform, params);
 		boid->SetActorLabel(name);
-		boid->DirectionAngle = 0.0f;
+		boid->DirectionAngle = -2.0f;
 
 		AddBoidToArray(boid);
 
@@ -154,19 +154,25 @@ void UFlock::TickComponent(float DeltaTime)
 							{
 								//check if the neighbor is visible by the boid
 
+								//FVector boidDirectionVector = boid->GetDirectionVector();
+
+								//FVector subVector = neighbor->GetTransform().GetLocation() - boid->GetTransform().GetLocation();
+
+								//FVector normalizedSubVector = subVector.GetSafeNormal();
+
+								////subVector.ToDirectionAndLength(normalizedSubVector, magnitude);
+
+								//float angle = FMath::Acos(FVector::DotProduct(boidDirectionVector, normalizedSubVector));
+
+								////this is a valid neighbor
+								//if (angle <= BoidFOV / 2.0f)
+
 								FVector boidDirectionVector = boid->GetDirectionVector();
 
-								FVector normalizedSubVector;
 								FVector subVector = neighbor->GetTransform().GetLocation() - boid->GetTransform().GetLocation();
 
-								normalizedSubVector = subVector.GetSafeNormal();
-
-								//subVector.ToDirectionAndLength(normalizedSubVector, magnitude);
-
-								float angle = FMath::Acos(FVector::DotProduct(boidDirectionVector, normalizedSubVector));
-
 								//this is a valid neighbor
-								if (angle <= BoidFOV / 2.0f)
+								if (FVector::DotProduct(boidDirectionVector, subVector) >= FMath::Cos(FMath::DegreesToRadians(BoidFOV / 2.0f)))
 								{
 									//NeighborData nd;
 									//nd.DirectionAngle = neighbor->DirectionAngle;
@@ -186,8 +192,9 @@ void UFlock::TickComponent(float DeltaTime)
 									if (distance <= SeparationRadius)
 									{
 										separationCount++;
-										subVector = boid->GetTransform().GetLocation() - neighbor->GetTransform().GetLocation();
-										subVector /= distance>2.0f?distance:2.0f;
+										//subVector = boid->GetTransform().GetLocation() - neighbor->GetTransform().GetLocation();
+										//subVector /= distance>2.0f?distance:2.0f;
+										//subVector.Normalize();
 										separation += subVector;
 									}
 								}
@@ -208,9 +215,11 @@ void UFlock::TickComponent(float DeltaTime)
 			}
 			if (separationCount > 0)
 			{
-				//separation *= -1.0f;
+				
 				separation /= separationCount;
-				if(separation.Size() >= 2.0f) separation.Normalize();// /= separation.Size();
+				separation *= -1.0f;
+				separation.Normalize();
+				//if(separation.Size() >= 2.0f) separation.Normalize();// /= separation.Size();
 			}
 
 			boid->Tick(DeltaTime, alignmentAngle, cohesion, separation);
