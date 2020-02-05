@@ -28,12 +28,27 @@ void UFlock::Initialize(class AActor* boidsOwner, TSubclassOf<class ABoid> boidB
 	_boidOwner = boidsOwner;
 	_boidBPClass = boidBPClass;
 
+	//FVector origin;
+	// GetActorBounds(true, origin, _actorBounds);
+	//_actorBounds /= 2.0f;
+
 	_width = _height = _depth = _gridSize = 1;
 
 	UWorld* world = GetWorld();
 
 	if (world)
 	{
+		//get the boid bounds and destroy this actor. Separation radius should not be less than the boid's bounds.
+		auto tempBoid = world->SpawnActor<ABoid>(_boidBPClass, FTransform(FVector::ZeroVector));
+
+		FVector origin;
+		FVector boidBounds;
+		tempBoid->GetActorBounds(true, origin, boidBounds);
+
+		tempBoid->Destroy();
+		auto maxComponent = boidBounds.GetMax();
+		SeparationRadius = FMath::Max(SeparationRadius, maxComponent * 1.5f);
+
 		//this entire hard coding will be optimized
 		FString name = "Boid";
 		name.AppendInt(_boids.Num());
@@ -98,6 +113,12 @@ void UFlock::Initialize(class AActor* boidsOwner, TSubclassOf<class ABoid> boidB
 
 		AddBoidToArray(boid);
 	}
+
+	bool index0 = _boids.IsValidIndex(0);
+	bool index3 = _boids.IsValidIndex(3);
+	bool index4 = _boids.IsValidIndex(4);
+
+	UE_LOG(FlockingBehaviorLogs, Warning, TEXT("width is:: %d, height %d, and depth:: %d "), _width,_height,_depth);
 }
 
 // Called every frame
@@ -109,13 +130,16 @@ void UFlock::TickComponent(float DeltaTime)
 		SortBoids();
 
 		//for(auto& boid : _boids)
-		for (int i = 0; i < _boids.Num(); i++)
+		for (int i = 0; i < _boids.Num(); i++)//
 		{
 			auto boid = _boids[i];
 			//get the neigbors to a given boid and send a data structure of there transofrm, velocity and direction to the 
 			//boid in focus
 			FVector indices;
 			Get3DIndicies(i, indices);
+
+			//if (boid->GetActorLabel().Equals(TEXT("Boid3")))
+			//	UE_LOG(FlockingBehaviorLogs, Warning, TEXT("i:: %d, indices.X:: %f indices.Y:: %f, indices.Z:: %f"), i, indices.X, indices.Y, indices.Z);
 
 			float alignmentAngle = 0.0f;
 			FVector separation = FVector::ZeroVector;
@@ -132,7 +156,42 @@ void UFlock::TickComponent(float DeltaTime)
 					for (int z = -1; z <= 1; z++)
 					{
 						//this is the location of boid whose neighbors we are finding
-						if (x == y == z == 0) continue;
+						//if (x == 0 && y == 0 && z == 0) continue;
+
+						//if (boid->GetActorLabel().Equals(TEXT("Boid3")) && (x == 0 && y == 0 && z == 1))
+						//{
+						//	int g = 0;
+						//}
+
+						if (indices.Z == 0)
+						{
+							if (_height == 1 && z != 0) continue;
+							if (_height > 1 && z < 0) continue;
+						}
+						else if (indices.Z == _height-1)
+						{
+							if (z == 1) continue;
+						}
+
+						if (indices.Y == 0)
+						{
+							if (_width == 1 && y != 0) continue;
+							if (_width > 1 && y < 0) continue;
+						}
+						else if (indices.Y == _width - 1)
+						{
+							if (y == 1) continue;
+						}
+
+						if (indices.X == 0)
+						{
+							if (_depth == 1 && x != 0) continue;
+							if (_depth > 1 && x < 0) continue;
+						}
+						else if (indices.X == _depth - 1)
+						{
+							if (x == 1) continue;
+						}
 
 						FVector neighborIndices;
 
@@ -140,10 +199,20 @@ void UFlock::TickComponent(float DeltaTime)
 						neighborIndices.Y = indices.Y + y;
 						neighborIndices.Z = indices.Z + z;
 
+						//if (boid->GetActorLabel().Equals(TEXT("Boid3")))
+						//{
+						//	UE_LOG(FlockingBehaviorLogs, Warning, TEXT("(x:: %d, y:: %d, z:: %d) && (neighborIndices.X:: %f, neighborIndices.Y:: %f, neighborIndices.Z:: %f)"), x,y,z, neighborIndices.X, neighborIndices.Y, neighborIndices.Z);
+						//}
+
+						if (neighborIndices.X < 0.0f || neighborIndices.Y < 0.0f || neighborIndices.Z < 0.0f) continue;
+						
 						int neighborIndex;
 						GetFlatIndex(neighborIndices, neighborIndex);
 
-						if (_boids.IsValidIndex(neighborIndex))
+						//if (boid->GetActorLabel().Equals(TEXT("Boid3")))
+						//	UE_LOG(FlockingBehaviorLogs, Error, TEXT("neighborIndex:: %d "), neighborIndex);
+
+						if (_boids.IsValidIndex(neighborIndex) && neighborIndex != i)
 						{
 							//check if this object is in vicinity and in vision
 							auto neighbor = _boids[neighborIndex];
@@ -174,28 +243,20 @@ void UFlock::TickComponent(float DeltaTime)
 								//this is a valid neighbor
 								if (FVector::DotProduct(boidDirectionVector, subVector) >= FMath::Cos(FMath::DegreesToRadians(BoidFOV / 2.0f)))
 								{
-									//NeighborData nd;
-									//nd.DirectionAngle = neighbor->DirectionAngle;
-									//nd.Distance = distance;
-									//nd.Location = neighbor->GetTransform().GetLocation();
-
-									//neighborsData.Add(nd);
+									UE_LOG(FlockingBehaviorLogs, Warning, TEXT("Boid is:: %s and NEIGHBOR is:: %s "), *(boid->GetActorLabel()), *(neighbor->GetActorLabel()) );
 
 									neighborCount++;
-
-									//Alignment
 									alignmentAngle += neighbor->DirectionAngle;
 
 									cohesion += neighbor->GetTransform().GetLocation();
 
-									//Separation
-									if (distance <= SeparationRadius)
+									if (distance > 0.0f && distance <= SeparationRadius)
 									{
-										separationCount++;
-										//subVector = boid->GetTransform().GetLocation() - neighbor->GetTransform().GetLocation();
-										//subVector /= distance>2.0f?distance:2.0f;
+										subVector = boid->GetTransform().GetLocation() - neighbor->GetTransform().GetLocation();
 										//subVector.Normalize();
+										subVector /= distance;
 										separation += subVector;
+										separationCount++;
 									}
 								}
 							}
@@ -204,25 +265,24 @@ void UFlock::TickComponent(float DeltaTime)
 				}
 			}
 
-			//
 			if (neighborCount > 0)
 			{
 				alignmentAngle /= neighborCount;
 
 				cohesion /= neighborCount;
-				cohesion = cohesion - boid->GetTransform().GetLocation();
-				if (cohesion.Size() >= 2.0f) cohesion.Normalize();// /= cohesion.Size();
+				cohesion -= boid->GetTransform().GetLocation();
+				//mag can be 0
+				cohesion = cohesion.GetSafeNormal();
 			}
+
 			if (separationCount > 0)
 			{
-				
 				separation /= separationCount;
-				separation *= -1.0f;
-				separation.Normalize();
-				//if(separation.Size() >= 2.0f) separation.Normalize();// /= separation.Size();
 			}
 
 			boid->Tick(DeltaTime, alignmentAngle, cohesion, separation);
+
+			UE_LOG(FlockingBehaviorLogs, Warning, TEXT("******************************************"));
 		}
 	}
 }
@@ -259,14 +319,13 @@ void UFlock::AddBoidToArray(class ABoid* boid)
 
 void UFlock::Get3DIndicies(int flatIndex, FVector& indices)
 {
-	int depthIndex = flatIndex % _depth;
+	int depthIndex = flatIndex / (_width * _height);
 
-	//dividing with depth gives us on layer of the 3d array like getting one face/layer/2dmatrix from a cube
-	//then find index as we find for a 2d array
+	flatIndex -= (depthIndex * _width * _height);
 
-	int heightIndex = (flatIndex / _depth) / _height;
+	int heightIndex = flatIndex / _width;
 
-	int widthIndex = (flatIndex / _depth) % _height;
+	int widthIndex = flatIndex % _width;
 
 	indices.X = depthIndex;
 	indices.Y = widthIndex;

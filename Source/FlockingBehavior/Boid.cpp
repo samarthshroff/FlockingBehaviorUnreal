@@ -62,39 +62,35 @@ void ABoid::Tick(float DeltaTime, float alignmentAngle, FVector cohesion, FVecto
 	_directionVector.X = FMath::Cos(FMath::DegreesToRadians(DirectionAngle));
 	_directionVector.Y = FMath::Sin(FMath::DegreesToRadians(DirectionAngle));
 
-	_directionVector.Normalize();// /= _directionVector.Size();
+	_directionVector.Normalize();
 	_directionVector *= MaxSpeed;
-
-	//_directionVector = _directionVector - _velocity;
-	//if (_directionVector.Size() > MaxSteeringForce)
-	//{
-	//	_directionVector.Normalize(MaxSteeringForce);
-	//}
 
 	if (cohesion != FVector::ZeroVector)
 	{
 		cohesion *= MaxSpeed;
-		cohesion = cohesion - _velocity;
+		cohesion -= _velocity;
+
 		if (cohesion.Size() > MaxSteeringForce)
 		{
-			cohesion.Normalize();// /= cohesion.Size();
+			cohesion.Normalize();
 			cohesion *= MaxSteeringForce;
 		}
 	}
 
-	if (separation != FVector::ZeroVector)
+	if (separation != FVector::ZeroVector && separation.Size() > 0)
 	{
+		separation.Normalize();
 		separation *= MaxSpeed;
-		separation = separation - _velocity;
+		separation -= _velocity;
+
 		if (separation.Size() > MaxSteeringForce)
 		{
-			separation.Normalize();// /= separation.Size();
+			separation.Normalize();
 			separation *= MaxSteeringForce;
-			//separation.Normalize(MaxSteeringForce);
 		}
 	}
-	
-	_velocity = _directionVector;// +cohesion + separation;// 
+
+	_velocity = _directionVector + cohesion + separation;// 
 		 
 	FVector displacement = _velocity * DeltaTime;
 
