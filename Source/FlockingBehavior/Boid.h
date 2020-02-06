@@ -62,6 +62,10 @@ private:
 	UPROPERTY()
 	FVector _directionVector;
 
+	FVector Separate(TArray<ABoid*> boids);
+	FVector Align(TArray<ABoid*> boids);
+	FVector Cohesion(TArray<ABoid*> boids);
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -69,6 +73,8 @@ protected:
 public:	
 	// Called every frame
 	void Tick(float DeltaTime, float alignmentAngle, FVector cohesion, FVector separation);
+
+	void Tick(float DeltaTime, TArray<ABoid*> boids);
 
 //  UFUNCTION()
 //     void OnActorOverlap(AActor* SelfActor, AActor* OtherActor, FVector NormalImpulse, const FHitResult& Hit);

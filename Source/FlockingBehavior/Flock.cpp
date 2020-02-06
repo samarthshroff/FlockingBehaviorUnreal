@@ -34,69 +34,85 @@ void UFlock::Initialize(class AActor* boidsOwner, TSubclassOf<class ABoid> boidB
 
 	if (world)
 	{
-		//this entire hard coding will be optimized
-		FString name = "Boid";
-		name.AppendInt(_boids.Num());
-
 		FActorSpawnParameters params;
-		params.Owner = _boidOwner;
-		params.Name = FName(*name);
 
-		FTransform transform = FTransform(FVector(-3160.0f, 0.0f, 250.0f));
-		auto boid = world->SpawnActor<ABoid>(_boidBPClass, transform, params);
-		boid->SetActorLabel(name);
+		for (int i = 0; i < 5; i++)
+		{
+			FString name = "Boid";
+			name.AppendInt(i);
+			params.Owner = _boidOwner;
+			params.Name = FName(*name);
 
-		boid->DirectionAngle = 0.0f;
+			FTransform transform = FTransform(FVector(-3160.0f, 0.0f, 250.0f));
+			auto boid = world->SpawnActor<ABoid>(_boidBPClass, transform, params);
+			boid->SetActorLabel(name);
 
-		AddBoidToArray(boid);
+			boid->DirectionAngle = 0.0f;
 
-		name = "Boid";
-		name.AppendInt(_boids.Num());
-		params.Owner = _boidOwner;
-		params.Name = FName(*name);
+			AddBoidToArray(boid);
+		}
 
-		transform = FTransform(FVector(-3160.0f, 400.0f, 250.0f));
-		boid = world->SpawnActor<ABoid>(_boidBPClass, transform, params);
-		boid->SetActorLabel(name);
-		boid->DirectionAngle = -15.0f;
+		////this entire hard coding will be optimized
+		//FString name = "Boid";
+		//name.AppendInt(_boids.Num());		
+		//params.Owner = _boidOwner;
+		//params.Name = FName(*name);
 
-		AddBoidToArray(boid);
+		//FTransform transform = FTransform(FVector(-3160.0f, 0.0f, 250.0f));
+		//auto boid = world->SpawnActor<ABoid>(_boidBPClass, transform, params);
+		//boid->SetActorLabel(name);
 
-		name = "Boid";
-		name.AppendInt(_boids.Num());
-		params.Owner = _boidOwner;
-		params.Name = FName(*name);
+		//boid->DirectionAngle = 0.0f;
 
-		transform = FTransform(FVector(-3160.0f, 200.0f, 250.0f));
-		boid = world->SpawnActor<ABoid>(_boidBPClass, transform, params);
-		boid->SetActorLabel(name);
-		boid->DirectionAngle = 1.0f;
+		//AddBoidToArray(boid);
 
-		AddBoidToArray(boid);
+		//name = "Boid";
+		//name.AppendInt(_boids.Num());
+		//params.Owner = _boidOwner;
+		//params.Name = FName(*name);
 
-		name = "Boid";
-		name.AppendInt(_boids.Num());
-		params.Owner = _boidOwner;
-		params.Name = FName(*name);
+		//transform = FTransform(FVector(-3160.0f, 400.0f, 250.0f));
+		//boid = world->SpawnActor<ABoid>(_boidBPClass, transform, params);
+		//boid->SetActorLabel(name);
+		//boid->DirectionAngle = -15.0f;
 
-		transform = FTransform(FVector(-3160.0f, -200.0f, 250.0f));
-		boid = world->SpawnActor<ABoid>(_boidBPClass, transform, params);
-		boid->SetActorLabel(name);
-		boid->DirectionAngle = -2.0f;
+		//AddBoidToArray(boid);
 
-		AddBoidToArray(boid);
+		//name = "Boid";
+		//name.AppendInt(_boids.Num());
+		//params.Owner = _boidOwner;
+		//params.Name = FName(*name);
 
-		name = "Boid";
-		name.AppendInt(_boids.Num());
-		params.Owner = _boidOwner;
-		params.Name = FName(*name);
+		//transform = FTransform(FVector(-3160.0f, 200.0f, 250.0f));
+		//boid = world->SpawnActor<ABoid>(_boidBPClass, transform, params);
+		//boid->SetActorLabel(name);
+		//boid->DirectionAngle = 1.0f;
 
-		transform = FTransform(FVector(-3280.0f, -200.0f, 250.0f));
-		boid = world->SpawnActor<ABoid>(_boidBPClass, transform, params);
-		boid->SetActorLabel(name);
-		boid->DirectionAngle = 10.0f;
+		//AddBoidToArray(boid);
 
-		AddBoidToArray(boid);
+		//name = "Boid";
+		//name.AppendInt(_boids.Num());
+		//params.Owner = _boidOwner;
+		//params.Name = FName(*name);
+
+		//transform = FTransform(FVector(-3160.0f, -200.0f, 250.0f));
+		//boid = world->SpawnActor<ABoid>(_boidBPClass, transform, params);
+		//boid->SetActorLabel(name);
+		//boid->DirectionAngle = -2.0f;
+
+		//AddBoidToArray(boid);
+
+		//name = "Boid";
+		//name.AppendInt(_boids.Num());
+		//params.Owner = _boidOwner;
+		//params.Name = FName(*name);
+
+		//transform = FTransform(FVector(-3280.0f, -200.0f, 250.0f));
+		//boid = world->SpawnActor<ABoid>(_boidBPClass, transform, params);
+		//boid->SetActorLabel(name);
+		//boid->DirectionAngle = 10.0f;
+
+		//AddBoidToArray(boid);
 	}
 }
 
@@ -108,121 +124,9 @@ void UFlock::TickComponent(float DeltaTime)
 		//sort the boids here
 		SortBoids();
 
-		//for(auto& boid : _boids)
-		for (int i = 0; i < _boids.Num(); i++)
+		for (auto& boid : _boids)
 		{
-			auto boid = _boids[i];
-			//get the neigbors to a given boid and send a data structure of there transofrm, velocity and direction to the 
-			//boid in focus
-			FVector indices;
-			Get3DIndicies(i, indices);
-
-			float alignmentAngle = 0.0f;
-			FVector separation = FVector::ZeroVector;
-			FVector cohesion = FVector::ZeroVector;
-			int neighborCount = 0;
-			int separationCount = 0;
-
-			//TArray<FNeighborData> neighborsData;
-
-			for (int x = -1; x <= 1; x++)
-			{
-				for (int y = -1; y <= 1; y++)
-				{
-					for (int z = -1; z <= 1; z++)
-					{
-						//this is the location of boid whose neighbors we are finding
-						if (x == y == z == 0) continue;
-
-						FVector neighborIndices;
-
-						neighborIndices.X = indices.X + x;
-						neighborIndices.Y = indices.Y + y;
-						neighborIndices.Z = indices.Z + z;
-
-						int neighborIndex;
-						GetFlatIndex(neighborIndices, neighborIndex);
-
-						if (_boids.IsValidIndex(neighborIndex))
-						{
-							//check if this object is in vicinity and in vision
-							auto neighbor = _boids[neighborIndex];
-
-							//distance is sqrt((x2-x2)^2 + (y2-y1)^2 + (z2-z1)^2)
-							float distance = FVector::Distance(boid->GetTransform().GetLocation(), neighbor->GetTransform().GetLocation());
-							if (distance <= NeighborhoodRadius)
-							{
-								//check if the neighbor is visible by the boid
-
-								//FVector boidDirectionVector = boid->GetDirectionVector();
-
-								//FVector subVector = neighbor->GetTransform().GetLocation() - boid->GetTransform().GetLocation();
-
-								//FVector normalizedSubVector = subVector.GetSafeNormal();
-
-								////subVector.ToDirectionAndLength(normalizedSubVector, magnitude);
-
-								//float angle = FMath::Acos(FVector::DotProduct(boidDirectionVector, normalizedSubVector));
-
-								////this is a valid neighbor
-								//if (angle <= BoidFOV / 2.0f)
-
-								FVector boidDirectionVector = boid->GetDirectionVector();
-
-								FVector subVector = neighbor->GetTransform().GetLocation() - boid->GetTransform().GetLocation();
-
-								//this is a valid neighbor
-								if (FVector::DotProduct(boidDirectionVector, subVector) >= FMath::Cos(FMath::DegreesToRadians(BoidFOV / 2.0f)))
-								{
-									//NeighborData nd;
-									//nd.DirectionAngle = neighbor->DirectionAngle;
-									//nd.Distance = distance;
-									//nd.Location = neighbor->GetTransform().GetLocation();
-
-									//neighborsData.Add(nd);
-
-									neighborCount++;
-
-									//Alignment
-									alignmentAngle += neighbor->DirectionAngle;
-
-									cohesion += neighbor->GetTransform().GetLocation();
-
-									//Separation
-									if (distance <= SeparationRadius)
-									{
-										separationCount++;
-										//subVector = boid->GetTransform().GetLocation() - neighbor->GetTransform().GetLocation();
-										//subVector /= distance>2.0f?distance:2.0f;
-										//subVector.Normalize();
-										separation += subVector;
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-
-			//
-			if (neighborCount > 0)
-			{
-				alignmentAngle /= neighborCount;
-
-				cohesion /= neighborCount;
-				cohesion = cohesion - boid->GetTransform().GetLocation();
-				if (cohesion.Size() >= 2.0f) cohesion.Normalize();// /= cohesion.Size();
-			}
-			if (separationCount > 0)
-			{
-				
-				separation /= separationCount;
-				separation *= -1.0f;
-				separation.Normalize();
-				//if(separation.Size() >= 2.0f) separation.Normalize();// /= separation.Size();
-			}
-
-			boid->Tick(DeltaTime, alignmentAngle, cohesion, separation);
+			boid->Tick(DeltaTime, _boids);
 		}
 	}
 }
