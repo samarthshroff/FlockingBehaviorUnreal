@@ -49,6 +49,8 @@ public:
 
 private:
 
+	static float _speed;
+
 	//speed * direction vector
 	UPROPERTY()
 	FVector _velocity;
@@ -70,8 +72,8 @@ public:
 	// Called every frame
 	void Tick(float DeltaTime, float alignmentAngle, FVector cohesion, FVector separation);
 
-//  UFUNCTION()
-//     void OnActorOverlap(AActor* SelfActor, AActor* OtherActor, FVector NormalImpulse, const FHitResult& Hit);
+  UFUNCTION()
+     void OnActorOverlap(AActor* SelfActor, AActor* OtherActor, FVector NormalImpulse, const FHitResult& Hit);
 	
 };
 

@@ -49,69 +49,87 @@ void UFlock::Initialize(class AActor* boidsOwner, TSubclassOf<class ABoid> boidB
 		auto maxComponent = boidBounds.GetMax();
 		SeparationRadius = FMath::Max(SeparationRadius, maxComponent * 1.5f);
 
-		//this entire hard coding will be optimized
-		FString name = "Boid";
-		name.AppendInt(_boids.Num());
-
 		FActorSpawnParameters params;
-		params.Owner = _boidOwner;
-		params.Name = FName(*name);
 
-		FTransform transform = FTransform(FVector(-3160.0f, 0.0f, 250.0f));
-		auto boid = world->SpawnActor<ABoid>(_boidBPClass, transform, params);
-		boid->SetActorLabel(name);
+		for (int i = 0; i < 1; i++)
+		{
+			FString name = "Boid";
+			name.AppendInt(i);
+			params.Owner = _boidOwner;
+			params.Name = FName(*name);
 
-		boid->DirectionAngle = 0.0f;
+			FTransform transform = FTransform(FVector(-3160.0f, 0.0f, 250.0f));
+			auto boid = world->SpawnActor<ABoid>(_boidBPClass, transform, params);
+			boid->SetActorLabel(name);
 
-		AddBoidToArray(boid);
+			boid->DirectionAngle = 1.0f;// FMath::RandRange(-180.0f, 180.0f);
 
-		name = "Boid";
-		name.AppendInt(_boids.Num());
-		params.Owner = _boidOwner;
-		params.Name = FName(*name);
+			AddBoidToArray(boid);
+		}
 
-		transform = FTransform(FVector(-3160.0f, 400.0f, 250.0f));
-		boid = world->SpawnActor<ABoid>(_boidBPClass, transform, params);
-		boid->SetActorLabel(name);
-		boid->DirectionAngle = -15.0f;
+		////this entire hard coding will be optimized
+		//FString name = "Boid";
+		//name.AppendInt(_boids.Num());
 
-		AddBoidToArray(boid);
+		//FActorSpawnParameters params;
+		//params.Owner = _boidOwner;
+		//params.Name = FName(*name);
 
-		name = "Boid";
-		name.AppendInt(_boids.Num());
-		params.Owner = _boidOwner;
-		params.Name = FName(*name);
+		//FTransform transform = FTransform(FVector(-3160.0f, 0.0f, 250.0f));
+		//auto boid = world->SpawnActor<ABoid>(_boidBPClass, transform, params);
+		//boid->SetActorLabel(name);
 
-		transform = FTransform(FVector(-3160.0f, 200.0f, 250.0f));
-		boid = world->SpawnActor<ABoid>(_boidBPClass, transform, params);
-		boid->SetActorLabel(name);
-		boid->DirectionAngle = 1.0f;
+		//boid->DirectionAngle = 0.0f;
 
-		AddBoidToArray(boid);
+		//AddBoidToArray(boid);
 
-		name = "Boid";
-		name.AppendInt(_boids.Num());
-		params.Owner = _boidOwner;
-		params.Name = FName(*name);
+		//name = "Boid";
+		//name.AppendInt(_boids.Num());
+		//params.Owner = _boidOwner;
+		//params.Name = FName(*name);
 
-		transform = FTransform(FVector(-3160.0f, -200.0f, 250.0f));
-		boid = world->SpawnActor<ABoid>(_boidBPClass, transform, params);
-		boid->SetActorLabel(name);
-		boid->DirectionAngle = -2.0f;
+		//transform = FTransform(FVector(-3160.0f, 400.0f, 250.0f));
+		//boid = world->SpawnActor<ABoid>(_boidBPClass, transform, params);
+		//boid->SetActorLabel(name);
+		//boid->DirectionAngle = -15.0f;
 
-		AddBoidToArray(boid);
+		//AddBoidToArray(boid);
 
-		name = "Boid";
-		name.AppendInt(_boids.Num());
-		params.Owner = _boidOwner;
-		params.Name = FName(*name);
+		//name = "Boid";
+		//name.AppendInt(_boids.Num());
+		//params.Owner = _boidOwner;
+		//params.Name = FName(*name);
 
-		transform = FTransform(FVector(-3280.0f, -200.0f, 250.0f));
-		boid = world->SpawnActor<ABoid>(_boidBPClass, transform, params);
-		boid->SetActorLabel(name);
-		boid->DirectionAngle = 10.0f;
+		//transform = FTransform(FVector(-3160.0f, 200.0f, 250.0f));
+		//boid = world->SpawnActor<ABoid>(_boidBPClass, transform, params);
+		//boid->SetActorLabel(name);
+		//boid->DirectionAngle = 1.0f;
 
-		AddBoidToArray(boid);
+		//AddBoidToArray(boid);
+
+		//name = "Boid";
+		//name.AppendInt(_boids.Num());
+		//params.Owner = _boidOwner;
+		//params.Name = FName(*name);
+
+		//transform = FTransform(FVector(-3160.0f, -200.0f, 250.0f));
+		//boid = world->SpawnActor<ABoid>(_boidBPClass, transform, params);
+		//boid->SetActorLabel(name);
+		//boid->DirectionAngle = -2.0f;
+
+		//AddBoidToArray(boid);
+
+		//name = "Boid";
+		//name.AppendInt(_boids.Num());
+		//params.Owner = _boidOwner;
+		//params.Name = FName(*name);
+
+		//transform = FTransform(FVector(-3280.0f, -200.0f, 250.0f));
+		//boid = world->SpawnActor<ABoid>(_boidBPClass, transform, params);
+		//boid->SetActorLabel(name);
+		//boid->DirectionAngle = 10.0f;
+
+		//AddBoidToArray(boid);
 	}
 
 	bool index0 = _boids.IsValidIndex(0);
@@ -124,167 +142,168 @@ void UFlock::Initialize(class AActor* boidsOwner, TSubclassOf<class ABoid> boidB
 // Called every frame
 void UFlock::TickComponent(float DeltaTime)
 {
-	if (_boids.Num() > 0)
-	{
-		//sort the boids here
-		SortBoids();
+	_boids[0]->Tick(DeltaTime, 0.0f, FVector::ZeroVector, FVector::ZeroVector);
+	//if (_boids.Num() > 0)
+	//{
+	//	//sort the boids here
+	//	SortBoids();
 
-		//for(auto& boid : _boids)
-		for (int i = 0; i < _boids.Num(); i++)//
-		{
-			auto boid = _boids[i];
-			//get the neigbors to a given boid and send a data structure of there transofrm, velocity and direction to the 
-			//boid in focus
-			FVector indices;
-			Get3DIndicies(i, indices);
+	//	//for(auto& boid : _boids)
+	//	for (int i = 0; i < _boids.Num(); i++)//
+	//	{
+	//		auto boid = _boids[i];
+	//		//get the neigbors to a given boid and send a data structure of there transofrm, velocity and direction to the 
+	//		//boid in focus
+	//		FVector indices;
+	//		Get3DIndicies(i, indices);
 
-			//if (boid->GetActorLabel().Equals(TEXT("Boid3")))
-			//	UE_LOG(FlockingBehaviorLogs, Warning, TEXT("i:: %d, indices.X:: %f indices.Y:: %f, indices.Z:: %f"), i, indices.X, indices.Y, indices.Z);
+	//		//if (boid->GetActorLabel().Equals(TEXT("Boid3")))
+	//		//	UE_LOG(FlockingBehaviorLogs, Warning, TEXT("i:: %d, indices.X:: %f indices.Y:: %f, indices.Z:: %f"), i, indices.X, indices.Y, indices.Z);
 
-			float alignmentAngle = 0.0f;
-			FVector separation = FVector::ZeroVector;
-			FVector cohesion = FVector::ZeroVector;
-			int neighborCount = 0;
-			int separationCount = 0;
+	//		float alignmentAngle = 0.0f;
+	//		FVector separation = FVector::ZeroVector;
+	//		FVector cohesion = FVector::ZeroVector;
+	//		int neighborCount = 0;
+	//		int separationCount = 0;
 
-			//TArray<FNeighborData> neighborsData;
+	//		//TArray<FNeighborData> neighborsData;
 
-			for (int x = -1; x <= 1; x++)
-			{
-				for (int y = -1; y <= 1; y++)
-				{
-					for (int z = -1; z <= 1; z++)
-					{
-						//this is the location of boid whose neighbors we are finding
-						//if (x == 0 && y == 0 && z == 0) continue;
+	//		/*for (int x = -1; x <= 1; x++)
+	//		{
+	//			for (int y = -1; y <= 1; y++)
+	//			{
+	//				for (int z = -1; z <= 1; z++)
+	//				{
+	//					//this is the location of boid whose neighbors we are finding
+	//					//if (x == 0 && y == 0 && z == 0) continue;
 
-						//if (boid->GetActorLabel().Equals(TEXT("Boid3")) && (x == 0 && y == 0 && z == 1))
-						//{
-						//	int g = 0;
-						//}
+	//					//if (boid->GetActorLabel().Equals(TEXT("Boid3")) && (x == 0 && y == 0 && z == 1))
+	//					//{
+	//					//	int g = 0;
+	//					//}
 
-						if (indices.Z == 0)
-						{
-							if (_height == 1 && z != 0) continue;
-							if (_height > 1 && z < 0) continue;
-						}
-						else if (indices.Z == _height-1)
-						{
-							if (z == 1) continue;
-						}
+	//					if (indices.Z == 0)
+	//					{
+	//						if (_height == 1 && z != 0) continue;
+	//						if (_height > 1 && z < 0) continue;
+	//					}
+	//					else if (indices.Z == _height-1)
+	//					{
+	//						if (z == 1) continue;
+	//					}
 
-						if (indices.Y == 0)
-						{
-							if (_width == 1 && y != 0) continue;
-							if (_width > 1 && y < 0) continue;
-						}
-						else if (indices.Y == _width - 1)
-						{
-							if (y == 1) continue;
-						}
+	//					if (indices.Y == 0)
+	//					{
+	//						if (_width == 1 && y != 0) continue;
+	//						if (_width > 1 && y < 0) continue;
+	//					}
+	//					else if (indices.Y == _width - 1)
+	//					{
+	//						if (y == 1) continue;
+	//					}
 
-						if (indices.X == 0)
-						{
-							if (_depth == 1 && x != 0) continue;
-							if (_depth > 1 && x < 0) continue;
-						}
-						else if (indices.X == _depth - 1)
-						{
-							if (x == 1) continue;
-						}
+	//					if (indices.X == 0)
+	//					{
+	//						if (_depth == 1 && x != 0) continue;
+	//						if (_depth > 1 && x < 0) continue;
+	//					}
+	//					else if (indices.X == _depth - 1)
+	//					{
+	//						if (x == 1) continue;
+	//					}
 
-						FVector neighborIndices;
+	//					FVector neighborIndices;
 
-						neighborIndices.X = indices.X + x;
-						neighborIndices.Y = indices.Y + y;
-						neighborIndices.Z = indices.Z + z;
+	//					neighborIndices.X = indices.X + x;
+	//					neighborIndices.Y = indices.Y + y;
+	//					neighborIndices.Z = indices.Z + z;
 
-						//if (boid->GetActorLabel().Equals(TEXT("Boid3")))
-						//{
-						//	UE_LOG(FlockingBehaviorLogs, Warning, TEXT("(x:: %d, y:: %d, z:: %d) && (neighborIndices.X:: %f, neighborIndices.Y:: %f, neighborIndices.Z:: %f)"), x,y,z, neighborIndices.X, neighborIndices.Y, neighborIndices.Z);
-						//}
+	//					//if (boid->GetActorLabel().Equals(TEXT("Boid3")))
+	//					//{
+	//					//	UE_LOG(FlockingBehaviorLogs, Warning, TEXT("(x:: %d, y:: %d, z:: %d) && (neighborIndices.X:: %f, neighborIndices.Y:: %f, neighborIndices.Z:: %f)"), x,y,z, neighborIndices.X, neighborIndices.Y, neighborIndices.Z);
+	//					//}
 
-						if (neighborIndices.X < 0.0f || neighborIndices.Y < 0.0f || neighborIndices.Z < 0.0f) continue;
-						
-						int neighborIndex;
-						GetFlatIndex(neighborIndices, neighborIndex);
+	//					if (neighborIndices.X < 0.0f || neighborIndices.Y < 0.0f || neighborIndices.Z < 0.0f) continue;
+	//					
+	//					int neighborIndex;
+	//					GetFlatIndex(neighborIndices, neighborIndex);
 
-						//if (boid->GetActorLabel().Equals(TEXT("Boid3")))
-						//	UE_LOG(FlockingBehaviorLogs, Error, TEXT("neighborIndex:: %d "), neighborIndex);
+	//					//if (boid->GetActorLabel().Equals(TEXT("Boid3")))
+	//					//	UE_LOG(FlockingBehaviorLogs, Error, TEXT("neighborIndex:: %d "), neighborIndex);
 
-						if (_boids.IsValidIndex(neighborIndex) && neighborIndex != i)
-						{
-							//check if this object is in vicinity and in vision
-							auto neighbor = _boids[neighborIndex];
+	//					if (_boids.IsValidIndex(neighborIndex) && neighborIndex != i)
+	//					{
+	//						//check if this object is in vicinity and in vision
+	//						auto neighbor = _boids[neighborIndex];
 
-							//distance is sqrt((x2-x2)^2 + (y2-y1)^2 + (z2-z1)^2)
-							float distance = FVector::Distance(boid->GetTransform().GetLocation(), neighbor->GetTransform().GetLocation());
-							if (distance <= NeighborhoodRadius)
-							{
-								//check if the neighbor is visible by the boid
+	//						//distance is sqrt((x2-x2)^2 + (y2-y1)^2 + (z2-z1)^2)
+	//						float distance = FVector::Distance(boid->GetTransform().GetLocation(), neighbor->GetTransform().GetLocation());
+	//						if (distance <= NeighborhoodRadius)
+	//						{
+	//							//check if the neighbor is visible by the boid
 
-								//FVector boidDirectionVector = boid->GetDirectionVector();
+	//							//FVector boidDirectionVector = boid->GetDirectionVector();
 
-								//FVector subVector = neighbor->GetTransform().GetLocation() - boid->GetTransform().GetLocation();
+	//							//FVector subVector = neighbor->GetTransform().GetLocation() - boid->GetTransform().GetLocation();
 
-								//FVector normalizedSubVector = subVector.GetSafeNormal();
+	//							//FVector normalizedSubVector = subVector.GetSafeNormal();
 
-								////subVector.ToDirectionAndLength(normalizedSubVector, magnitude);
+	//							////subVector.ToDirectionAndLength(normalizedSubVector, magnitude);
 
-								//float angle = FMath::Acos(FVector::DotProduct(boidDirectionVector, normalizedSubVector));
+	//							//float angle = FMath::Acos(FVector::DotProduct(boidDirectionVector, normalizedSubVector));
 
-								////this is a valid neighbor
-								//if (angle <= BoidFOV / 2.0f)
+	//							////this is a valid neighbor
+	//							//if (angle <= BoidFOV / 2.0f)
 
-								FVector boidDirectionVector = boid->GetDirectionVector();
+	//							FVector boidDirectionVector = boid->GetDirectionVector();
 
-								FVector subVector = neighbor->GetTransform().GetLocation() - boid->GetTransform().GetLocation();
+	//							FVector subVector = neighbor->GetTransform().GetLocation() - boid->GetTransform().GetLocation();
 
-								//this is a valid neighbor
-								if (FVector::DotProduct(boidDirectionVector, subVector) >= FMath::Cos(FMath::DegreesToRadians(BoidFOV / 2.0f)))
-								{
-									UE_LOG(FlockingBehaviorLogs, Warning, TEXT("Boid is:: %s and NEIGHBOR is:: %s "), *(boid->GetActorLabel()), *(neighbor->GetActorLabel()) );
+	//							//this is a valid neighbor
+	//							//if (FVector::DotProduct(boidDirectionVector, subVector) >= FMath::Cos(FMath::DegreesToRadians(BoidFOV / 2.0f)))
+	//							//{
+	//								UE_LOG(FlockingBehaviorLogs, Warning, TEXT("Boid is:: %s and NEIGHBOR is:: %s "), *(boid->GetActorLabel()), *(neighbor->GetActorLabel()) );
 
-									neighborCount++;
-									alignmentAngle += neighbor->DirectionAngle;
+	//								neighborCount++;
+	//								alignmentAngle += neighbor->DirectionAngle;
 
-									cohesion += neighbor->GetTransform().GetLocation();
+	//								cohesion += neighbor->GetTransform().GetLocation();
+	//							//}
+	//							//distance > 0.0f &&
+	//							if (distance <= SeparationRadius)
+	//							{
+	//								subVector = boid->GetTransform().GetLocation() - neighbor->GetTransform().GetLocation();
+	//								//subVector.Normalize();
+	//								//subVector /= distance;
+	//								separation += subVector;
+	//								separationCount++;
+	//							}
+	//						}
+	//					}
+	//				}
+	//			}
+	//		}*/
 
-									if (distance > 0.0f && distance <= SeparationRadius)
-									{
-										subVector = boid->GetTransform().GetLocation() - neighbor->GetTransform().GetLocation();
-										//subVector.Normalize();
-										subVector /= distance;
-										separation += subVector;
-										separationCount++;
-									}
-								}
-							}
-						}
-					}
-				}
-			}
+	//		//if (neighborCount > 0)
+	//		//{
+	//		//	alignmentAngle /= neighborCount;
 
-			if (neighborCount > 0)
-			{
-				alignmentAngle /= neighborCount;
+	//		//	cohesion /= neighborCount;
+	//		//	cohesion -= boid->GetTransform().GetLocation();
+	//		//	//mag can be 0
+	//		//	cohesion = cohesion.GetSafeNormal();
+	//		//}
 
-				cohesion /= neighborCount;
-				cohesion -= boid->GetTransform().GetLocation();
-				//mag can be 0
-				cohesion = cohesion.GetSafeNormal();
-			}
+	//		//if (separationCount > 0)
+	//		//{
+	//		//	separation /= separationCount;
+	//		//}
 
-			if (separationCount > 0)
-			{
-				separation /= separationCount;
-			}
+	//		boid->Tick(DeltaTime, alignmentAngle, cohesion, separation);
 
-			boid->Tick(DeltaTime, alignmentAngle, cohesion, separation);
-
-			UE_LOG(FlockingBehaviorLogs, Warning, TEXT("******************************************"));
-		}
-	}
+	//		UE_LOG(FlockingBehaviorLogs, Warning, TEXT("******************************************"));
+	//	}
+	//}
 }
 
 void UFlock::AddBoidToArray(class ABoid* boid)
