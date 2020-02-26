@@ -18,15 +18,6 @@ public:
 	// Sets default values for this actor's properties
 	AGameManager();
 
-	//UPROPERTY(VisibleAnywhere, BlueprintreadOnly)
-	//USceneComponent *RootComp;
-
-	//UPROPERTY(VisibleAnywhere, BlueprintreadOnly)
-	//USpringArmComponent *SpringArm;
-
-	//UPROPERTY(VisibleAnywhere, BlueprintreadOnly)
-	//UCameraComponent *Camera;
-
 	UPROPERTY(VisibleAnywhere, BlueprintreadOnly)
 	UFlock* Flock;
 
@@ -37,14 +28,8 @@ private:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-	//virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 public:
 	// Called every frame
 	void Tick(float DeltaTime) override;
-
-//private:
-//
-//	void MoveForward(float value);
-//	void MoveRight(float value);
 };
