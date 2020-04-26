@@ -174,29 +174,49 @@ void UFlock::TickComponent(float DeltaTime)
 								//this is a valid neighbor
 								if (FVector::DotProduct(boidDirectionVector, subVector) >= FMath::Cos(FMath::DegreesToRadians(BoidFOV / 2.0f)))
 								{
-									//NeighborData nd;
-									//nd.DirectionAngle = neighbor->DirectionAngle;
-									//nd.Distance = distance;
-									//nd.Location = neighbor->GetTransform().GetLocation();
-
-									//neighborsData.Add(nd);
-
-									neighborCount++;
-
 									//Alignment
 									alignmentAngle += neighbor->DirectionAngle;
+									neighborCount++;
 
+									//Cohesion
 									cohesion += neighbor->GetTransform().GetLocation();
 
 									//Separation
-									if (distance <= SeparationRadius)
+									if( distance > 0 && distance <= SeparationRadius)
 									{
+										FVector subtractionVector = boid->GetTransform().GetLocation() - neighbor->GetTransform().GetLocation();
+										subtractionVector.Normalize();
+										FVector individualSteeringForce = subtractionVector / distance;
+
+										separation += individualSteeringForce;
+
 										separationCount++;
-										//subVector = boid->GetTransform().GetLocation() - neighbor->GetTransform().GetLocation();
-										//subVector /= distance>2.0f?distance:2.0f;
-										//subVector.Normalize();
-										separation += subVector;
 									}
+
+
+									// //NeighborData nd;
+									// //nd.DirectionAngle = neighbor->DirectionAngle;
+									// //nd.Distance = distance;
+									// //nd.Location = neighbor->GetTransform().GetLocation();
+
+									// //neighborsData.Add(nd);
+
+									// neighborCount++;
+
+									// //Alignment
+									// alignmentAngle += neighbor->DirectionAngle;
+
+									// cohesion += neighbor->GetTransform().GetLocation();
+
+									// //Separation
+									// if (distance <= SeparationRadius)
+									// {
+									// 	separationCount++;
+									// 	//subVector = boid->GetTransform().GetLocation() - neighbor->GetTransform().GetLocation();
+									// 	//subVector /= distance>2.0f?distance:2.0f;
+									// 	//subVector.Normalize();
+									// 	separation += subVector;
+									// }
 								}
 							}
 						}
@@ -204,25 +224,24 @@ void UFlock::TickComponent(float DeltaTime)
 				}
 			}
 
-			//
-			if (neighborCount > 0)
-			{
-				alignmentAngle /= neighborCount;
+			// //
+			 if (neighborCount > 0)
+			 {
+			 	alignmentAngle /= neighborCount;
 
-				cohesion /= neighborCount;
-				cohesion = cohesion - boid->GetTransform().GetLocation();
-				if (cohesion.Size() >= 2.0f) cohesion.Normalize();// /= cohesion.Size();
-			}
+			 	cohesion /= neighborCount;
+			 	cohesion = cohesion - boid->GetTransform().GetLocation();
+			// 	if (cohesion.Size() >= 2.0f) cohesion.Normalize();// /= cohesion.Size();
+			 }
 			if (separationCount > 0)
-			{
-				
+			{				
 				separation /= separationCount;
-				separation *= -1.0f;
-				separation.Normalize();
+				// separation *= -1.0f;
+				// separation.Normalize();
 				//if(separation.Size() >= 2.0f) separation.Normalize();// /= separation.Size();
 			}
 
-			boid->Tick(DeltaTime, alignmentAngle, cohesion, separation);
+			//boid->Tick(DeltaTime, alignmentAngle, cohesion, separation);
 		}
 	}
 }

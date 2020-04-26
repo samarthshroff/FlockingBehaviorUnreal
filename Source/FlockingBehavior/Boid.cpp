@@ -62,8 +62,11 @@ void ABoid::Tick(float DeltaTime, float alignmentAngle, FVector cohesion, FVecto
 	_directionVector.X = FMath::Cos(FMath::DegreesToRadians(DirectionAngle));
 	_directionVector.Y = FMath::Sin(FMath::DegreesToRadians(DirectionAngle));
 
-	_directionVector.Normalize();// /= _directionVector.Size();
-	_directionVector *= MaxSpeed;
+	FVector headingVector = _directionVector;
+	headingVector.Normalize(MaxSpeed);
+
+	// _directionVector.Normalize();// /= _directionVector.Size();
+	// _directionVector *= MaxSpeed;
 
 	//_directionVector = _directionVector - _velocity;
 	//if (_directionVector.Size() > MaxSteeringForce)
@@ -73,35 +76,56 @@ void ABoid::Tick(float DeltaTime, float alignmentAngle, FVector cohesion, FVecto
 
 	if (cohesion != FVector::ZeroVector)
 	{
-		cohesion *= MaxSpeed;
+		//considering the mass of boid is 1 in digital world in F=ma
+		//we get F=a, thus acceleration=cohesion steering force
+		//thus using s = ut + 0.5*a*t where s = cohesion (as it is the displacement from boid position to the avg position of neighbors)
+		//thus a = (2*(s - u*t))/t^2 where a is acceleration which is the steering force (F)
+		//thus if we don't use the constant value 2 and time in the formula then we get a = s - v 
+		//i.e. sterring force = disaplcement - velocity
+
 		cohesion = cohesion - _velocity;
-		if (cohesion.Size() > MaxSteeringForce)
-		{
-			cohesion.Normalize();// /= cohesion.Size();
-			cohesion *= MaxSteeringForce;
-		}
+
+		// cohesion *= MaxSpeed;
+		// cohesion = cohesion - _velocity;
+		// if (cohesion.Size() > MaxSteeringForce)
+		// {
+		// 	cohesion.Normalize();// /= cohesion.Size();
+		// 	cohesion *= MaxSteeringForce;
+		// }
 	}
 
 	if (separation != FVector::ZeroVector)
 	{
-		separation *= MaxSpeed;
-		separation = separation - _velocity;
-		if (separation.Size() > MaxSteeringForce)
-		{
-			separation.Normalize();// /= separation.Size();
-			separation *= MaxSteeringForce;
-			//separation.Normalize(MaxSteeringForce);
-		}
+		//considering the mass of boid is 1 in digital world in F=ma
+		//we get F=a, thus acceleration=separation steering force i.e. separation
+		// v = at + u
+		separation = (separation * DeltaTime) + _velocity;
+
+		// separation *= MaxSpeed;
+		// separation = separation - _velocity;
+		// if (separation.Size() > MaxSteeringForce)
+		// {
+		// 	separation.Normalize();// /= separation.Size();
+		// 	separation *= MaxSteeringForce;
+		// 	//separation.Normalize(MaxSteeringForce);
+		// }
 	}
 	
-	_velocity = _directionVector;// +cohesion + separation;// 
-		 
+	FVector acceleration = _directionVector +cohesion + separation;
+
+	_velocity = acceleration * DeltaTime + _velocity;
+
+	if (_velocity.Size() > MaxSpeed)
+	{
+		_velocity.Normalize(MaxSpeed);
+	}
+
 	FVector displacement = _velocity * DeltaTime;
 
 	FVector location = GetActorLocation();
 	location += displacement;
 
-	float headingAngle = _directionVector.HeadingAngle();
+	float headingAngle = headingVector.HeadingAngle();
 	//only in z because we want to rotate the boid in yaw, in xy plane 
 	FQuat quat = FQuat(FVector(0, 0, 1), headingAngle);
 
