@@ -10,7 +10,9 @@ AGameManager::AGameManager()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-	bAddDefaultMovementBindings = true;	
+	bAddDefaultMovementBindings = true;
+
+	_startAI = false;
 
 	Flock = CreateDefaultSubobject<UFlock>("Flock");
 	AddInstanceComponent(Flock);
@@ -27,8 +29,19 @@ void AGameManager::BeginPlay()
 
 void AGameManager::Tick(float DeltaTime)
 {
-	if(Flock != nullptr)
+	if (_startAI && Flock != nullptr)
 	{
 		Flock->TickComponent(DeltaTime);
 	}
+}
+void AGameManager::StartAI ()
+{
+	_startAI = true;
+}
+
+void AGameManager::SetupPlayerInputComponent(class UInputComponent *InputComponent)
+{
+	Super::SetupPlayerInputComponent(InputComponent);
+
+	InputComponent->BindAction("StartAI", IE_Pressed, this, &AGameManager::StartAI);
 }

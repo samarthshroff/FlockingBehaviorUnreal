@@ -2,6 +2,9 @@
 
 
 #include "Flock.h"
+#include "Kismet/GameplayStatics.h"
+
+//DEFINE_LOG_CATEGORY(FlockingBehaviorLogs)
 
 // Sets default values for this component's properties
 UFlock::UFlock()
@@ -42,20 +45,18 @@ void UFlock::Initialize(class AActor* boidsOwner, TSubclassOf<class ABoid> boidB
 		auto maxComponent = boidBounds.GetMax();
 		SeparationRadius = FMath::Max(SeparationRadius, maxComponent * 1.5f);
 
-		FActorSpawnParameters params;
-
-		for (int i = 0; i < 1; i++)
+		for (int i = 0; i < 8; i++)
 		{
 			FString name = "Boid";
 			name.AppendInt(i);
-			params.Owner = _boidOwner;
-			params.Name = FName(*name);
 
-			FTransform transform = FTransform(FVector(-3160.0f, 0.0f, 250.0f));
-			auto boid = world->SpawnActor<ABoid>(_boidBPClass, transform, params);
+			FTransform transform = FTransform(FVector(FMath::FRandRange(-3160.0f, -3000.0f), FMath::FRandRange(-200.0f,350.0f), 250.0f));
+			//need to defer the spawning as we need to set the direction angle before boids BeginPlay is called
+			auto boid = world->SpawnActorDeferred<ABoid>(_boidBPClass, transform, _boidOwner);
 			boid->SetActorLabel(name);
-
-			boid->DirectionAngle = 1.0f;// FMath::RandRange(-180.0f, 180.0f);
+			boid->DirectionAngle = FMath::RandRange(-40.0f,40.0f);// (-1, 1)* (i + 1) * 10.0f;
+			
+			UGameplayStatics::FinishSpawningActor(boid, transform);
 
 			AddBoidToArray(boid);
 		}
@@ -64,8 +65,7 @@ void UFlock::Initialize(class AActor* boidsOwner, TSubclassOf<class ABoid> boidB
 
 // Called every frame
 void UFlock::TickComponent(float DeltaTime)
-{
-	_boids[0]->Tick(DeltaTime, 0.0f, FVector::ZeroVector, FVector::ZeroVector);
+{	
 	if (_boids.Num() > 0)
 	{
 		//sort the boids here
@@ -81,6 +81,7 @@ void UFlock::TickComponent(float DeltaTime)
 			Get3DIndicies(i, indices);
 
 			float alignmentAngle = 0.0f;
+			FVector alignment = FVector::ZeroVector;
 			FVector separation = FVector::ZeroVector;
 			FVector cohesion = FVector::ZeroVector;
 			int neighborCount = 0;
@@ -138,6 +139,11 @@ void UFlock::TickComponent(float DeltaTime)
 							//check if this object is in vicinity and in vision
 							auto neighbor = _boids[neighborIndex];
 
+							//UE_LOG(FlockingBehaviorLogs, Warning, TEXT("The boid at: %d is at location x: %f, y: %f, z: %f"), i, boid->GetTransform().GetLocation().X, boid->GetTransform().GetLocation().Y, boid->GetTransform().GetLocation().Z);
+
+							//UE_LOG(FlockingBehaviorLogs, Warning, TEXT("The neighbor at: %d is at location x: %f, y: %f, z: %f"), neighborIndex, neighbor->GetTransform().GetLocation().X, neighbor->GetTransform().GetLocation().Y, neighbor->GetTransform().GetLocation().Z);
+
+
 							//distance is sqrt((x2-x2)^2 + (y2-y1)^2 + (z2-z1)^2)
 							float distance = FVector::Distance(boid->GetTransform().GetLocation(), neighbor->GetTransform().GetLocation());
 							if (distance <= NeighborhoodRadius)
@@ -152,6 +158,13 @@ void UFlock::TickComponent(float DeltaTime)
 								if (FVector::DotProduct(boidDirectionVector, subVector) >= FMath::Cos(FMath::DegreesToRadians(BoidFOV / 2.0f)))
 								{
 									//alignment and cohesion calculations will happen here
+
+									alignmentAngle += neighbor->DirectionAngle;
+									alignment += neighbor->GetVelocity();
+
+									cohesion += neighbor->GetTransform().GetLocation();
+
+									neighborCount++;
 								}
 
 								//separation logic will happen here
@@ -161,7 +174,15 @@ void UFlock::TickComponent(float DeltaTime)
 				}
 			}
 
-			//boid->Tick(DeltaTime, alignmentAngle, cohesion, separation);
+			if (neighborCount > 0)
+			{
+				alignment /= neighborCount;
+				alignmentAngle /= neighborCount;
+
+				cohesion /= neighborCount;
+			}
+
+			boid->Tick(DeltaTime, alignmentAngle, alignment, cohesion, separation);
 		}
 	}
 }

@@ -47,6 +47,8 @@ public:
 
 	FVector GetDirectionVector();
 
+	FVector GetVelocity();
+
 private:
 
 	static float _speed;
@@ -70,7 +72,7 @@ protected:
 
 public:	
 	// Called every frame
-	void Tick(float DeltaTime, float alignmentAngle, FVector cohesion, FVector separation);
+	void Tick(float DeltaTime, float alignmentAngle, FVector alignment, FVector cohesion, FVector separation);
 
   UFUNCTION()
      void OnActorOverlap(AActor* SelfActor, AActor* OtherActor, FVector NormalImpulse, const FHitResult& Hit);

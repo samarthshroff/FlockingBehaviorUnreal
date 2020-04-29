@@ -1,6 +1,5 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "Boid.h"
 #include "DrawDebugHelpers.h"
 
@@ -24,6 +23,11 @@ ABoid::ABoid()
 FVector ABoid::GetDirectionVector()
 {
 	return _directionVector;
+}
+
+FVector ABoid::GetVelocity()
+{
+	return _velocity;
 }
 
 // Called when the game starts or when spawned
@@ -55,27 +59,47 @@ void ABoid::BeginPlay()
 }
 
 // Called every frame
-void ABoid::Tick(float DeltaTime, float alignmentAngle, FVector cohesion, FVector separation)
+void ABoid::Tick(float DeltaTime, float alignmentAngle, FVector alignment, FVector cohesion, FVector separation)
 {
-	//Super::Tick(DeltaTime);
-
-	// DirectionAngle = alignmentAngle;// -DirectionAngle;
-
-	_directionVector.X = FMath::Cos(FMath::DegreesToRadians(DirectionAngle));
-	_directionVector.Y = FMath::Sin(FMath::DegreesToRadians(DirectionAngle));
-
-	_directionVector.Normalize();
-
 	//the three vectors - alignment, cohesion and sepration will affect the velocity here
 
-	_velocity = _speed * _directionVector;
-	FVector displacement = _velocity * DeltaTime;
+	if (alignmentAngle != DirectionAngle) //!alignment.IsZero())
+	{
+		DirectionAngle = alignmentAngle;
+
+		_directionVector.X = FMath::Cos(FMath::DegreesToRadians(DirectionAngle));
+		_directionVector.Y = FMath::Sin(FMath::DegreesToRadians(DirectionAngle));
+
+		////_directionVector = alignment;
+		//always go in the direction of neighbor but with max speed
+
+		_directionVector.Normalize();
+		_directionVector *= MaxSpeed;
+	}
+
+	if (!cohesion.IsZero())
+	{
+		FVector displacement = cohesion - this->GetActorLocation();
+
+	}
+
+	//steering = desired - velocity
+	auto alignmentSteering = _directionVector - _velocity;
+	if (alignmentSteering.Size() > MaxSpeed)
+	{
+		alignmentSteering.Normalize(FMath::Square(MaxSteeringForce));
+		alignmentSteering *= MaxSteeringForce;
+	}
+	
+	_velocity += alignmentSteering;
+	FVector displacement = _velocity *DeltaTime;
 
 	FVector location = GetActorLocation();
 	location += displacement;
 
+	//this is used to rotation the body of the boid in the direction it is moving
 	float headingAngle = _directionVector.HeadingAngle();
-	//only in z because we want to rotate the boid in yaw, in xy plane 
+	//only in z because we want to rotate the boid in yaw, in xy plane
 	FQuat quat = FQuat(FVector(0, 0, 1), headingAngle);
 
 	SetActorLocationAndRotation(location, quat, false, nullptr, ETeleportType::None);
@@ -83,7 +107,7 @@ void ABoid::Tick(float DeltaTime, float alignmentAngle, FVector cohesion, FVecto
 	FVector forwardVector = GetActorForwardVector();
 }
 
-void ABoid::OnActorOverlap(AActor* SelfActor, AActor* OtherActor, FVector NormalImpulse, const FHitResult& Hit)
+void ABoid::OnActorOverlap(AActor *SelfActor, AActor *OtherActor, FVector NormalImpulse, const FHitResult &Hit)
 {
 	//TArray<UStaticMeshComponent> StaticComps;
 	//OtherActor->GetComponents< UStaticMeshComponent>(StaticComps);
