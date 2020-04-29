@@ -108,7 +108,7 @@ void UFlock::TickComponent(float DeltaTime)
 		//sort the boids here
 		SortBoids();
 
-		//for(auto& boid : _boids)
+		for(auto& boid : _boids)
 		for (int i = 0; i < _boids.Num(); i++)
 		{
 			auto boid = _boids[i];
@@ -152,7 +152,17 @@ void UFlock::TickComponent(float DeltaTime)
 							float distance = FVector::Distance(boid->GetTransform().GetLocation(), neighbor->GetTransform().GetLocation());
 							if (distance <= NeighborhoodRadius)
 							{
-								//check if the neighbor is visible by the boid
+								FVector boidDirectionVector = boid->GetDirectionVector();
+
+								FVector subVector = neighbor->GetTransform().GetLocation() - boid->GetTransform().GetLocation();
+
+								//this is a valid neighbor
+								if ( FVector::DotProduct(boidDirectionVector, subVector) >= FMath::Cos(FMath::DegreesToRadians(BoidFOV / 2.0f)))
+								{
+
+								}
+
+							/*	//check if the neighbor is visible by the boid
 
 								//FVector boidDirectionVector = boid->GetDirectionVector();
 
@@ -217,7 +227,7 @@ void UFlock::TickComponent(float DeltaTime)
 									// 	//subVector.Normalize();
 									// 	separation += subVector;
 									// }
-								}
+								}*/
 							}
 						}
 					}
@@ -225,7 +235,7 @@ void UFlock::TickComponent(float DeltaTime)
 			}
 
 			// //
-			 if (neighborCount > 0)
+			/* if (neighborCount > 0)
 			 {
 			 	alignmentAngle /= neighborCount;
 
@@ -239,9 +249,9 @@ void UFlock::TickComponent(float DeltaTime)
 				// separation *= -1.0f;
 				// separation.Normalize();
 				//if(separation.Size() >= 2.0f) separation.Normalize();// /= separation.Size();
-			}
+			}*/
 
-			//boid->Tick(DeltaTime, alignmentAngle, cohesion, separation);
+			boid->Tick(DeltaTime, alignmentAngle, cohesion, separation);
 		}
 	}
 }

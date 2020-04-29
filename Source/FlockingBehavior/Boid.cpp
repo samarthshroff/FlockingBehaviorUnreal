@@ -55,6 +55,11 @@ void ABoid::BeginPlay()
 // Called every frame
 void ABoid::Tick(float DeltaTime, float alignmentAngle, FVector cohesion, FVector separation)
 {
+
+}
+
+/*void ABoid::Tick(float DeltaTime, float alignmentAngle, FVector cohesion, FVector separation)
+{
 	//Super::Tick(DeltaTime);
 
 	 DirectionAngle = alignmentAngle;// -DirectionAngle;
@@ -99,7 +104,9 @@ void ABoid::Tick(float DeltaTime, float alignmentAngle, FVector cohesion, FVecto
 		//considering the mass of boid is 1 in digital world in F=ma
 		//we get F=a, thus acceleration=separation steering force i.e. separation
 		// v = at + u
-		separation = (separation * DeltaTime) + _velocity;
+		//separation = (separation * DeltaTime) + _velocity;
+
+		separation = 
 
 		// separation *= MaxSpeed;
 		// separation = separation - _velocity;
@@ -110,8 +117,8 @@ void ABoid::Tick(float DeltaTime, float alignmentAngle, FVector cohesion, FVecto
 		// 	//separation.Normalize(MaxSteeringForce);
 		// }
 	}
-	
-	FVector acceleration = _directionVector +cohesion + separation;
+
+	FVector acceleration = separation;	//_directionVector + cohesion + separation;
 
 	_velocity = acceleration * DeltaTime + _velocity;
 
@@ -150,9 +157,9 @@ void ABoid::Tick(float DeltaTime, float alignmentAngle, FVector cohesion, FVecto
 		//We will add the moving around a static object afterwards
 		//TO-DO add logic to move around a world static object like pillars
 	}	
-}
+}*/
 
-// void ABoid::OnActorOverlap(AActor* SelfActor, AActor* OtherActor, FVector NormalImpulse, const FHitResult& Hit)
-// {
-// 	UE_LOG(FlockingBehaviorLogs,Warning,TEXT("self actor %s hit with: %s"), *(SelfActor->GetFullName()), *(OtherActor->GetFullName()));
-// }
+	// void ABoid::OnActorOverlap(AActor* SelfActor, AActor* OtherActor, FVector NormalImpulse, const FHitResult& Hit)
+	// {
+	// 	UE_LOG(FlockingBehaviorLogs,Warning,TEXT("self actor %s hit with: %s"), *(SelfActor->GetFullName()), *(OtherActor->GetFullName()));
+	// }

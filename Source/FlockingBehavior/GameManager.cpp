@@ -1,22 +1,22 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "GameManager.h"
 
 // Sets default values
 AGameManager::AGameManager()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+	bAddDefaultMovementBindings = true;
 
-	RootComp = CreateDefaultSubobject<USceneComponent>("Root");
-	RootComponent = RootComp;
+	// RootComp = CreateDefaultSubobject<USceneComponent>("Root");
+	// RootComponent = RootComp;
 
-	SpringArm = CreateDefaultSubobject<USpringArmComponent>("SpringArm");
-	SpringArm->SetupAttachment(RootComponent);
+	// SpringArm = CreateDefaultSubobject<USpringArmComponent>("SpringArm");
+	// SpringArm->SetupAttachment(RootComponent);
 
-	Camera = CreateDefaultSubobject<UCameraComponent>("Camera");
-	Camera->SetupAttachment(SpringArm);
+	// Camera = CreateDefaultSubobject<UCameraComponent>("Camera");
+	// Camera->SetupAttachment(SpringArm);
 
 	Flock = CreateDefaultSubobject<UFlock>("Flock");
 	AddInstanceComponent(Flock);
@@ -33,7 +33,7 @@ void AGameManager::BeginPlay()
 
 void AGameManager::Tick(float DeltaTime)
 {
-	if(Flock != nullptr)
+	if (Flock != nullptr)
 	{
 		Flock->TickComponent(DeltaTime);
 	}

@@ -3,14 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Pawn.h"
-#include "GameFramework/SpringArmComponent.h"
-#include "Camera/CameraComponent.h"
+#include "GameFramework/DefaultPawn.h"
+//#include "GameFramework/SpringArmComponent.h"
+//#include "Camera/CameraComponent.h"
 #include "Flock.h"
 #include "GameManager.generated.h"
 
 UCLASS()
-class FLOCKINGBEHAVIOR_API AGameManager : public APawn
+class FLOCKINGBEHAVIOR_API AGameManager : public ADefaultPawn
 {
 	GENERATED_BODY()
 
@@ -18,14 +18,14 @@ public:
 	// Sets default values for this actor's properties
 	AGameManager();
 
-	UPROPERTY(VisibleAnywhere, BlueprintreadOnly)
-	USceneComponent *RootComp;
+	// UPROPERTY(VisibleAnywhere, BlueprintreadOnly)
+	// USceneComponent *RootComp;
 
-	UPROPERTY(VisibleAnywhere, BlueprintreadOnly)
-	USpringArmComponent *SpringArm;
+	// UPROPERTY(VisibleAnywhere, BlueprintreadOnly)
+	// USpringArmComponent *SpringArm;
 
-	UPROPERTY(VisibleAnywhere, BlueprintreadOnly)
-	UCameraComponent *Camera;
+	// UPROPERTY(VisibleAnywhere, BlueprintreadOnly)
+	// UCameraComponent *Camera;
 
 	UPROPERTY(VisibleAnywhere, BlueprintreadOnly)
 	UFlock* Flock;
