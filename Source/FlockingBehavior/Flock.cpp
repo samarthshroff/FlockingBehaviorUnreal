@@ -49,8 +49,8 @@ void UFlock::Initialize(class AActor* boidsOwner, TSubclassOf<class ABoid> boidB
 		{
 			FString name = "Boid";
 			name.AppendInt(i);
-
-			FTransform transform = FTransform(FVector(FMath::FRandRange(-3160.0f, -3000.0f), FMath::FRandRange(-200.0f,350.0f), 250.0f));
+			//FMath::FRandRange(-3160.0f, -3100.0f)
+			FTransform transform = FTransform(FVector(-3160.0f, FMath::FRandRange(-50.0f,350.0f), 250.0f));
 			//need to defer the spawning as we need to set the direction angle before boids BeginPlay is called
 			auto boid = world->SpawnActorDeferred<ABoid>(_boidBPClass, transform, _boidOwner);
 			boid->SetActorLabel(name);
@@ -139,10 +139,9 @@ void UFlock::TickComponent(float DeltaTime)
 							//check if this object is in vicinity and in vision
 							auto neighbor = _boids[neighborIndex];
 
-							//UE_LOG(FlockingBehaviorLogs, Warning, TEXT("The boid at: %d is at location x: %f, y: %f, z: %f"), i, boid->GetTransform().GetLocation().X, boid->GetTransform().GetLocation().Y, boid->GetTransform().GetLocation().Z);
+							UE_LOG(FlockingBehaviorLogs, Warning, TEXT("The boid at: %d is at location x: %f, y: %f, z: %f"), i, boid->GetTransform().GetLocation().X, boid->GetTransform().GetLocation().Y, boid->GetTransform().GetLocation().Z);
 
-							//UE_LOG(FlockingBehaviorLogs, Warning, TEXT("The neighbor at: %d is at location x: %f, y: %f, z: %f"), neighborIndex, neighbor->GetTransform().GetLocation().X, neighbor->GetTransform().GetLocation().Y, neighbor->GetTransform().GetLocation().Z);
-
+							UE_LOG(FlockingBehaviorLogs, Warning, TEXT("The neighbor at: %d is at location x: %f, y: %f, z: %f"), neighborIndex, neighbor->GetTransform().GetLocation().X, neighbor->GetTransform().GetLocation().Y, neighbor->GetTransform().GetLocation().Z);
 
 							//distance is sqrt((x2-x2)^2 + (y2-y1)^2 + (z2-z1)^2)
 							float distance = FVector::Distance(boid->GetTransform().GetLocation(), neighbor->GetTransform().GetLocation());
