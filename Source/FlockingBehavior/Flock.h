@@ -51,6 +51,10 @@ private:
 
 	Compare _dimensionToCompare;
 
+	TSet<float> _xSet;
+	TSet<float> _ySet;
+	TSet<float> _zSet;
+
 public:	
 	// Sets default values for this component's properties
 	UFlock();

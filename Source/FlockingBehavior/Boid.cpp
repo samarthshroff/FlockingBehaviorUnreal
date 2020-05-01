@@ -37,7 +37,7 @@ void ABoid::BeginPlay()
 
 	if (ABoid::_speed == -1.0f)
 	{
-		_speed = FMath::RandRange(100.0f, MaxSpeed);
+		_speed = FMath::RandRange(MaxSpeed*0.5f, MaxSpeed);
 	}
 
 	_world = GetWorld();
@@ -46,12 +46,19 @@ void ABoid::BeginPlay()
 	scriptDelegate.BindUFunction(this, FName("OnActorOverlap"));
 	OnActorBeginOverlap.Add(scriptDelegate);
 
-	_directionVector.X = FMath::Cos(FMath::DegreesToRadians(DirectionAngle));
-	_directionVector.Y = FMath::Sin(FMath::DegreesToRadians(DirectionAngle));
+	_velocity.X = FMath::Cos(FMath::DegreesToRadians(DirectionAngle));
+	_velocity.Y = FMath::Sin(FMath::DegreesToRadians(DirectionAngle));
 
-	_directionVector.Normalize();
-
-	_velocity = _speed * _directionVector;
+	//_directionVector.Normalize();
+	////_velocity = _speed * _directionVector;
+	//_velocity = _directionVector;
+	_velocity *= _speed;
+	if (_velocity.SizeSquared() > FMath::Square(MaxSpeed)) //p5.limit()
+	{
+		auto mag = _velocity.Size();
+		_velocity /= mag;
+		_velocity *= MaxSpeed;
+	}
 
 	FVector origin;
 	GetActorBounds(true, origin, _actorBounds);
@@ -59,52 +66,111 @@ void ABoid::BeginPlay()
 }
 
 // Called every frame
-void ABoid::Tick(float DeltaTime, float alignmentAngle, FVector alignment, FVector cohesion, FVector separation)
+void ABoid::Tick(float DeltaTime, float alignmentAngle, FVector alignmentSteering, FVector cohesionSteering, FVector separationSteering)
 {
 	//the three vectors - alignment, cohesion and sepration will affect the velocity here
 
-	if (alignmentAngle != DirectionAngle) //!alignment.IsZero())
+	//if (alignmentAngle != DirectionAngle) //!alignment.IsZero())
+	//{
+	//	DirectionAngle = alignmentAngle;
+
+	//	UE_LOG(FlockingBehaviorLogs, Warning, TEXT("the direction angle is:: %f "), DirectionAngle);
+
+	//	_directionVector.X = FMath::Cos(FMath::DegreesToRadians(DirectionAngle));
+	//	_directionVector.Y = FMath::Sin(FMath::DegreesToRadians(DirectionAngle));
+
+	//	////_directionVector = alignment;
+	//	//always go in the direction of neighbor but with max speed
+
+	//	_directionVector.Normalize();
+	//	_directionVector *= MaxSpeed;
+	//}
+
+	//alignmentSteering = FVector::ZeroVector;
+	//cohesionSteering = FVector::ZeroVector;
+	//separationSteering = FVector::ZeroVector;
+
+	if (!alignmentSteering.IsZero())
 	{
-		DirectionAngle = alignmentAngle;
+		//alignmentSteering = alignment;
 
-		_directionVector.X = FMath::Cos(FMath::DegreesToRadians(DirectionAngle));
-		_directionVector.Y = FMath::Sin(FMath::DegreesToRadians(DirectionAngle));
+		//DirectionAngle = FMath::RadiansToDegrees(FMath::Acos(_directionVector.X));
 
-		////_directionVector = alignment;
-		//always go in the direction of neighbor but with max speed
+		//these 2 lines are p5.setMag Normalize() should give the same output. need to check 
+		alignmentSteering /= alignmentSteering.Size();
+		alignmentSteering *= MaxSpeed;
 
-		_directionVector.Normalize();
-		_directionVector *= MaxSpeed;
+		//steering = desired - velocity
+		alignmentSteering = alignmentSteering - _velocity;
+		//if (alignmentSteering.SizeSquared() > FMath::Square(MaxSteeringForce)) //p5.limit()
+		//{
+		//	alignmentSteering /= alignmentSteering.Size();
+		//	alignmentSteering *= MaxSteeringForce;
+		//}
+
+		
+		//UE_LOG(FlockingBehaviorLogs, Warning, TEXT("_directionVector.X:: %f _directionVector.Y: %f _directionVector.Z: %f"), _directionVector.X, _directionVector.Y, _directionVector.Z);
 	}
 
-	if (!cohesion.IsZero())
+	if (!cohesionSteering.IsZero())
 	{
-		FVector displacement = cohesion - this->GetActorLocation();
+		cohesionSteering = cohesionSteering - this->GetActorLocation();
 
+		cohesionSteering /= cohesionSteering.Size();
+		cohesionSteering *= MaxSpeed;
+
+		cohesionSteering = cohesionSteering - _velocity;
+		//if (cohesionSteering.SizeSquared() > FMath::Square(MaxSteeringForce)) //p5.limit()
+		//{
+		//	cohesionSteering /= cohesionSteering.Size();
+		//	cohesionSteering *= MaxSteeringForce;
+		//}
 	}
 
-	//steering = desired - velocity
-	auto alignmentSteering = _directionVector - _velocity;
-	if (alignmentSteering.Size() > MaxSpeed)
+	if (!separationSteering.IsZero())
 	{
-		alignmentSteering.Normalize(FMath::Square(MaxSteeringForce));
-		alignmentSteering *= MaxSteeringForce;
+		separationSteering /= separationSteering.Size();
+		separationSteering *= MaxSpeed;
+
+		separationSteering = separationSteering - _velocity;
+		//if (separationSteering.SizeSquared() > FMath::Square(MaxSteeringForce)) //p5.limit()
+		//{
+		//	separationSteering /= separationSteering.Size();
+		//	separationSteering *= MaxSteeringForce;
+		//}
 	}
 	
-	_velocity += alignmentSteering;
-	FVector displacement = _velocity *DeltaTime;
+	_acceleration = alignmentSteering + cohesionSteering + separationSteering;
 
+	//UE_LOG(FlockingBehaviorLogs, Warning, TEXT("_acceleration is: X %f Y %f Z %f"), _acceleration.X, _acceleration.Y, _acceleration.Z);
+	UE_LOG(FlockingBehaviorLogs, Warning, TEXT("velocity before applying to displacement is: X %f Y %f Z %f and DeltaTime %f"), _velocity.X, _velocity.Y, _velocity.Z, DeltaTime);
+
+	FVector displacement = _velocity; //*DeltaTime;
+	UE_LOG(FlockingBehaviorLogs, Warning, TEXT(" displacement is: X %f Y %f Z %f "), displacement.X, displacement.Y, displacement.Z);
+	//UE_LOG(FlockingBehaviorLogs, Warning, TEXT(" displacement * _velocity.Size() is: X %f Y %f Z %f "), (displacement * _velocity.Size()).X, (displacement * _velocity.Size()).Y, (displacement * _velocity.Size()).Z);
 	FVector location = GetActorLocation();
 	location += displacement;
 
-	//this is used to rotation the body of the boid in the direction it is moving
-	float headingAngle = _directionVector.HeadingAngle();
+	//SetActorLocation(location);
+
+	////this is used to rotation the body of the boid in the direction it is moving
+	float headingAngle = _velocity.HeadingAngle();
+
 	//only in z because we want to rotate the boid in yaw, in xy plane
 	FQuat quat = FQuat(FVector(0, 0, 1), headingAngle);
 
 	SetActorLocationAndRotation(location, quat, false, nullptr, ETeleportType::None);
 
-	FVector forwardVector = GetActorForwardVector();
+	_velocity += _acceleration;
+
+	_acceleration = FVector::ZeroVector;
+
+	if (_velocity.Size() > MaxSpeed) //p5.limit()
+	{
+		auto mag = _velocity.Size();
+		_velocity /= mag;
+		_velocity *= MaxSpeed;
+	}
 }
 
 void ABoid::OnActorOverlap(AActor *SelfActor, AActor *OtherActor, FVector NormalImpulse, const FHitResult &Hit)

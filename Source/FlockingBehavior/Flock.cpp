@@ -45,12 +45,12 @@ void UFlock::Initialize(class AActor* boidsOwner, TSubclassOf<class ABoid> boidB
 		auto maxComponent = boidBounds.GetMax();
 		SeparationRadius = FMath::Max(SeparationRadius, maxComponent * 1.5f);
 
-		for (int i = 0; i < 8; i++)
+		for (int i = 0; i < 50; i++)
 		{
 			FString name = "Boid";
 			name.AppendInt(i);
-			//FMath::FRandRange(-3160.0f, -3100.0f)
-			FTransform transform = FTransform(FVector(-3160.0f, FMath::FRandRange(-50.0f,350.0f), 250.0f));
+			//
+			FTransform transform = FTransform(FVector(FMath::FRandRange(-3160.0f, -2160.0f), FMath::FRandRange(-400.0f,350.0f), 250.0f));
 			//need to defer the spawning as we need to set the direction angle before boids BeginPlay is called
 			auto boid = world->SpawnActorDeferred<ABoid>(_boidBPClass, transform, _boidOwner);
 			boid->SetActorLabel(name);
@@ -61,6 +61,8 @@ void UFlock::Initialize(class AActor* boidsOwner, TSubclassOf<class ABoid> boidB
 			AddBoidToArray(boid);
 		}
 	}
+
+	//UE_LOG(FlockingBehaviorLogs, Warning, TEXT("_width %d _height %d _depth %d"), _width, _height, _depth);
 }
 
 // Called every frame
@@ -71,14 +73,29 @@ void UFlock::TickComponent(float DeltaTime)
 		//sort the boids here
 		SortBoids();
 
+		_width = _ySet.Num();
+		_depth = _xSet.Num();
+		_height = _zSet.Num();
+
+		//UE_LOG(FlockingBehaviorLogs, Warning, TEXT("_width %d, _height %d, _depth %d"), _width, _height, _depth);
+
+		_xSet.Empty();
+		_ySet.Empty();
+		_zSet.Empty();
+
 		//for(auto& boid : _boids)
 		for (int i = 0; i < _boids.Num(); i++)
 		{
 			auto boid = _boids[i];
+
+			//UE_LOG(FlockingBehaviorLogs, Warning, TEXT("The boid at: %d is at location x: %f, y: %f, z: %f"), i, boid->GetTransform().GetLocation().X, boid->GetTransform().GetLocation().Y, boid->GetTransform().GetLocation().Z);
+
 			//get the neigbors to a given boid and send a data structure of there transofrm, velocity and direction to the 
 			//boid in focus
 			FVector indices;
 			Get3DIndicies(i, indices);
+
+			//UE_LOG(FlockingBehaviorLogs, Warning, TEXT("indices.X %f, indices.Y %f, indices.Z %f and i %d"), indices.X, indices.Y, indices.Z, i);
 
 			float alignmentAngle = 0.0f;
 			FVector alignment = FVector::ZeroVector;
@@ -134,14 +151,14 @@ void UFlock::TickComponent(float DeltaTime)
 						int neighborIndex;
 						GetFlatIndex(neighborIndices, neighborIndex);
 
+						//UE_LOG(FlockingBehaviorLogs, Warning, TEXT("neighborIndices.X %f, neighborIndices.Y %f, neighborIndices.Z %f and neighborIndex %d"), neighborIndices.X, neighborIndices.Y, neighborIndices.Z, neighborIndex);
+
 						if (_boids.IsValidIndex(neighborIndex) && neighborIndex != i)
 						{
 							//check if this object is in vicinity and in vision
 							auto neighbor = _boids[neighborIndex];
 
-							UE_LOG(FlockingBehaviorLogs, Warning, TEXT("The boid at: %d is at location x: %f, y: %f, z: %f"), i, boid->GetTransform().GetLocation().X, boid->GetTransform().GetLocation().Y, boid->GetTransform().GetLocation().Z);
-
-							UE_LOG(FlockingBehaviorLogs, Warning, TEXT("The neighbor at: %d is at location x: %f, y: %f, z: %f"), neighborIndex, neighbor->GetTransform().GetLocation().X, neighbor->GetTransform().GetLocation().Y, neighbor->GetTransform().GetLocation().Z);
+							//UE_LOG(FlockingBehaviorLogs, Warning, TEXT("The boid at: %d is at location x: %f, y: %f, z: %f"), i, boid->GetTransform().GetLocation().X, boid->GetTransform().GetLocation().Y, boid->GetTransform().GetLocation().Z);
 
 							//distance is sqrt((x2-x2)^2 + (y2-y1)^2 + (z2-z1)^2)
 							float distance = FVector::Distance(boid->GetTransform().GetLocation(), neighbor->GetTransform().GetLocation());
@@ -156,17 +173,33 @@ void UFlock::TickComponent(float DeltaTime)
 								//this is a valid neighbor
 								if (FVector::DotProduct(boidDirectionVector, subVector) >= FMath::Cos(FMath::DegreesToRadians(BoidFOV / 2.0f)))
 								{
+									//UE_LOG(FlockingBehaviorLogs, Warning, TEXT("Valid neighbor at: %d "), neighborIndex);
+									//is at location x: %f, y: %f, z: %f
+									//, neighbor->GetTransform().GetLocation().X, neighbor->GetTransform().GetLocation().Y, neighbor->GetTransform().GetLocation().Z
+
 									//alignment and cohesion calculations will happen here
 
-									alignmentAngle += neighbor->DirectionAngle;
+									//alignmentAngle += neighbor->DirectionAngle;
 									alignment += neighbor->GetVelocity();
 
 									cohesion += neighbor->GetTransform().GetLocation();
 
 									neighborCount++;
-								}
 
-								//separation logic will happen here
+									//separation logic will happen here
+									if (  distance <= SeparationRadius)
+									{
+										FVector separationSubVector = boid->GetTransform().GetLocation() - neighbor->GetTransform().GetLocation();
+
+										separationSubVector.Normalize();
+
+										separationSubVector /= distance;
+
+										separation += separationSubVector;
+
+										separationCount++;
+									}
+								}
 							}
 						}
 					}
@@ -176,9 +209,16 @@ void UFlock::TickComponent(float DeltaTime)
 			if (neighborCount > 0)
 			{
 				alignment /= neighborCount;
-				alignmentAngle /= neighborCount;
+
+				//UE_LOG(FlockingBehaviorLogs, Warning, TEXT("alignment.X: %f alignment.Y: %f and alignment.Z %f and neighborCount is: %d "), alignment.X, alignment.Y, alignment.Z, neighborCount);
+				//alignmentAngle = (float)(alignmentAngle/neighborCount);				
 
 				cohesion /= neighborCount;
+			}
+
+			if (separationCount > 0)
+			{
+				separation /= separationCount;
 			}
 
 			boid->Tick(DeltaTime, alignmentAngle, alignment, cohesion, separation);
@@ -280,10 +320,36 @@ int UFlock::Partition(int low, int high)
 	ABoid* pivot = _boids[high];
 	FVector pivotVector = pivot->GetTransform().GetLocation();
 
+	if (_dimensionToCompare == Compare::Depth)
+	{
+		_xSet.Add(pivotVector.X);
+	}
+	else if (_dimensionToCompare == Compare::Width)
+	{
+		_ySet.Add(pivotVector.Y);
+	}
+	else if (_dimensionToCompare == Compare::Height)
+	{
+		_zSet.Add(pivotVector.Z);
+	}
+
 	int i = low - 1;
 	for (int j = low; j < high; ++j)
 	{
 		FVector lhsBoidVector = _boids[j]->GetTransform().GetLocation();
+
+		if (_dimensionToCompare == Compare::Depth)
+		{
+			_xSet.Add(lhsBoidVector.X);
+		}
+		else if (_dimensionToCompare == Compare::Width)
+		{
+			_ySet.Add(lhsBoidVector.Y);
+		}
+		else if (_dimensionToCompare == Compare::Height)
+		{
+			_zSet.Add(lhsBoidVector.Z);
+		}
 
 		if ((_dimensionToCompare == Compare::Depth && lhsBoidVector.X >= pivotVector.X) ||
 			(_dimensionToCompare == Compare::Width && lhsBoidVector.Y <= pivotVector.Y) ||
