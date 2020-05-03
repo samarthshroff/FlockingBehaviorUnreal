@@ -101,7 +101,8 @@ void UFlock::TickComponent(float DeltaTime)
 			FVector alignment = FVector::ZeroVector;
 			FVector separation = FVector::ZeroVector;
 			FVector cohesion = FVector::ZeroVector;
-			int neighborCount = 0;
+			int alignmentCount = 0;
+			int cohesionCount = 0;
 			int separationCount = 0;
 
 			for (int x = -1; x <= 1; x++)
@@ -162,8 +163,8 @@ void UFlock::TickComponent(float DeltaTime)
 
 							//distance is sqrt((x2-x2)^2 + (y2-y1)^2 + (z2-z1)^2)
 							float distance = FVector::Distance(boid->GetTransform().GetLocation(), neighbor->GetTransform().GetLocation());
-							if (distance <= NeighborhoodRadius)
-							{
+							//if (distance <= NeighborhoodRadius)
+							//{
 								//check if the neighbor is visible by the boid
 
 								FVector boidDirectionVector = boid->GetDirectionVector();
@@ -180,14 +181,20 @@ void UFlock::TickComponent(float DeltaTime)
 									//alignment and cohesion calculations will happen here
 
 									//alignmentAngle += neighbor->DirectionAngle;
-									alignment += neighbor->GetVelocity();
+									if (distance <= 500.0f)
+									{
+										alignment += neighbor->GetVelocity();
+										alignmentCount++;
+									}
 
-									cohesion += neighbor->GetTransform().GetLocation();
-
-									neighborCount++;
+									if (distance <= 500.0f)
+									{
+										cohesion += neighbor->GetTransform().GetLocation();
+										cohesionCount++;
+									}
 
 									//separation logic will happen here
-									if (  distance <= SeparationRadius)
+									if ( distance <= 250.0f)
 									{
 										FVector separationSubVector = boid->GetTransform().GetLocation() - neighbor->GetTransform().GetLocation();
 
@@ -200,20 +207,24 @@ void UFlock::TickComponent(float DeltaTime)
 										separationCount++;
 									}
 								}
-							}
+							//}
 						}
 					}
 				}
 			}
 
-			if (neighborCount > 0)
+			if (alignmentCount > 0)
 			{
-				alignment /= neighborCount;
+				alignment /= alignmentCount;
 
 				//UE_LOG(FlockingBehaviorLogs, Warning, TEXT("alignment.X: %f alignment.Y: %f and alignment.Z %f and neighborCount is: %d "), alignment.X, alignment.Y, alignment.Z, neighborCount);
 				//alignmentAngle = (float)(alignmentAngle/neighborCount);				
 
-				cohesion /= neighborCount;
+				
+			}
+			if(cohesionCount > 0)
+			{
+				cohesion /= cohesionCount;
 			}
 
 			if (separationCount > 0)
