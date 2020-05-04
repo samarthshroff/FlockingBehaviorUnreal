@@ -40,6 +40,7 @@ void UFlock::Initialize(class AActor* boidsOwner, TSubclassOf<class ABoid> boidB
 		FVector origin;
 		FVector boidBounds;
 		tempBoid->GetActorBounds(true, origin, boidBounds);
+		//UE_LOG(FlockingBehaviorLogs, Warning, TEXT("boidBounds is: X %f Y %f Z %f"), boidBounds.X, boidBounds.Y, boidBounds.Z);
 
 		tempBoid->Destroy();
 		auto maxComponent = boidBounds.GetMax();
@@ -50,7 +51,8 @@ void UFlock::Initialize(class AActor* boidsOwner, TSubclassOf<class ABoid> boidB
 			FString name = "Boid";
 			name.AppendInt(i);
 			//
-			FTransform transform = FTransform(FVector(FMath::FRandRange(-3160.0f, -2160.0f), FMath::FRandRange(-400.0f,350.0f), 250.0f));
+			FTransform transform = FTransform(FVector(FMath::FRandRange(-3160.0f, -3100.0f), FMath::FRandRange(200.0f,350.0f), 250.0f));
+			//FTransform transform = FTransform(FVector(FMath::FRandRange(-3160.0f, -2160.0f), FMath::FRandRange(-400.0f,350.0f), 250.0f));
 			//need to defer the spawning as we need to set the direction angle before boids BeginPlay is called
 			auto boid = world->SpawnActorDeferred<ABoid>(_boidBPClass, transform, _boidOwner);
 			boid->SetActorLabel(name);
@@ -181,26 +183,26 @@ void UFlock::TickComponent(float DeltaTime)
 									//alignment and cohesion calculations will happen here
 
 									//alignmentAngle += neighbor->DirectionAngle;
-									if (distance <= 500.0f)
+									if (distance <= 100.0f)
 									{
 										alignment += neighbor->GetVelocity();
 										alignmentCount++;
 									}
 
-									if (distance <= 500.0f)
+									if (distance <= 100.0f)
 									{
 										cohesion += neighbor->GetTransform().GetLocation();
 										cohesionCount++;
 									}
 
 									//separation logic will happen here
-									if ( distance <= 250.0f)
+									if ( distance <= 200.0f)
 									{
 										FVector separationSubVector = boid->GetTransform().GetLocation() - neighbor->GetTransform().GetLocation();
 
-										separationSubVector.Normalize();
+										separationSubVector.Normalize(1.0f/distance);
 
-										separationSubVector /= distance;
+										//separationSubVector /= distance;
 
 										separation += separationSubVector;
 
@@ -218,9 +220,7 @@ void UFlock::TickComponent(float DeltaTime)
 				alignment /= alignmentCount;
 
 				//UE_LOG(FlockingBehaviorLogs, Warning, TEXT("alignment.X: %f alignment.Y: %f and alignment.Z %f and neighborCount is: %d "), alignment.X, alignment.Y, alignment.Z, neighborCount);
-				//alignmentAngle = (float)(alignmentAngle/neighborCount);				
-
-				
+				//alignmentAngle = (float)(alignmentAngle/neighborCount);
 			}
 			if(cohesionCount > 0)
 			{

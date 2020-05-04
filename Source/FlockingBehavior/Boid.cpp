@@ -90,7 +90,7 @@ void ABoid::Tick(float DeltaTime, float alignmentAngle, FVector alignmentSteerin
 	//cohesionSteering = FVector::ZeroVector;
 	//separationSteering = FVector::ZeroVector;
 
-	MaxSteeringForce = MaxSpeed * DeltaTime;
+	//MaxSteeringForce = MaxSpeed * DeltaTime * 10.0f;
 
 	if (!alignmentSteering.IsZero())
 	{
@@ -99,15 +99,15 @@ void ABoid::Tick(float DeltaTime, float alignmentAngle, FVector alignmentSteerin
 		//DirectionAngle = FMath::RadiansToDegrees(FMath::Acos(_directionVector.X));
 
 		//these 2 lines are p5.setMag Normalize() should give the same output. need to check 
-		alignmentSteering /= alignmentSteering.Size();
-		alignmentSteering *= MaxSpeed;
+		//alignmentSteering /= alignmentSteering.Size();
+		//alignmentSteering *= MaxSpeed;
 
 		//steering = desired - velocity
 		alignmentSteering = alignmentSteering - _velocity;
-		if (alignmentSteering.SizeSquared() > FMath::Square(MaxSteeringForce)) //p5.limit()
+		//if (alignmentSteering.SizeSquared() > FMath::Square(1.0f)) //p5.limit()
 		{
 			alignmentSteering /= alignmentSteering.Size();
-			alignmentSteering *= MaxSteeringForce;
+			alignmentSteering *= 1.0f;
 		}
 
 		
@@ -118,38 +118,48 @@ void ABoid::Tick(float DeltaTime, float alignmentAngle, FVector alignmentSteerin
 	{
 		cohesionSteering = cohesionSteering - this->GetActorLocation();
 
-		cohesionSteering /= cohesionSteering.Size();
-		cohesionSteering *= MaxSpeed;
+		//cohesionSteering /= cohesionSteering.Size();
+		//cohesionSteering *= MaxSpeed;
 
 		cohesionSteering = cohesionSteering - _velocity;
-		if (cohesionSteering.SizeSquared() > FMath::Square(MaxSteeringForce)) //p5.limit()
+		//if (cohesionSteering.SizeSquared() > FMath::Square(0.6f)) //p5.limit()
 		{
 			cohesionSteering /= cohesionSteering.Size();
-			cohesionSteering *= MaxSteeringForce;
+			cohesionSteering *= 0.6f;
 		}
 	}
 
 	if (!separationSteering.IsZero())
 	{
-		separationSteering /= separationSteering.Size();
-		separationSteering *= MaxSpeed;
+		//separationSteering /= separationSteering.Size();
+		//separationSteering *= MaxSpeed;
 
-		separationSteering = separationSteering - _velocity;
-		if (separationSteering.SizeSquared() > FMath::Square(MaxSteeringForce)) //p5.limit()
+		//separationSteering = separationSteering - _velocity;
+		//if (separationSteering.SizeSquared() > FMath::Square(2.0f)) //p5.limit()
 		{
 			separationSteering /= separationSteering.Size();
-			separationSteering *= MaxSteeringForce;
+			separationSteering *= 1.0f;
 		}
 
-		separationSteering *= 1.5f;
+		//separationSteering *= 2.0f;
+		//UE_LOG(FlockingBehaviorLogs, Warning, TEXT("separationSteering is: X %f Y %f Z %f and MaxSteeringForce %f "), separationSteering.X, separationSteering.Y, separationSteering.Z, MaxSteeringForce);
 	}
 	
 	_acceleration = alignmentSteering + cohesionSteering + separationSteering;
+	//_velocity += _acceleration;
 
+	//_acceleration = FVector::ZeroVector;
+
+	//if (_velocity.Size() > MaxSpeed) //p5.limit()
+	//{
+	//	auto mag = _velocity.Size();
+	//	_velocity /= mag;
+	//	_velocity *= MaxSpeed;
+	//}
 	//UE_LOG(FlockingBehaviorLogs, Warning, TEXT("_acceleration is: X %f Y %f Z %f"), _acceleration.X, _acceleration.Y, _acceleration.Z);
 	//UE_LOG(FlockingBehaviorLogs, Warning, TEXT("velocity before applying to displacement is: X %f Y %f Z %f and DeltaTime %f"), _velocity.X, _velocity.Y, _velocity.Z, DeltaTime);
 
-	FVector displacement = _velocity; //*DeltaTime;
+	FVector displacement = _velocity;// *DeltaTime;
 	//UE_LOG(FlockingBehaviorLogs, Warning, TEXT(" displacement is: X %f Y %f Z %f "), displacement.X, displacement.Y, displacement.Z);
 	//UE_LOG(FlockingBehaviorLogs, Warning, TEXT(" displacement * _velocity.Size() is: X %f Y %f Z %f "), (displacement * _velocity.Size()).X, (displacement * _velocity.Size()).Y, (displacement * _velocity.Size()).Z);
 	FVector location = GetActorLocation();
@@ -165,16 +175,17 @@ void ABoid::Tick(float DeltaTime, float alignmentAngle, FVector alignmentSteerin
 
 	SetActorLocationAndRotation(location, quat, false, nullptr, ETeleportType::None);
 
-	_velocity += _acceleration;
+	_acceleration.Normalize(MaxSpeed);
+	_velocity = _velocity + _acceleration;
 
 	_acceleration = FVector::ZeroVector;
 
-	if (_velocity.Size() > MaxSpeed) //p5.limit()
-	{
-		auto mag = _velocity.Size();
-		_velocity /= mag;
-		_velocity *= MaxSpeed;
-	}
+	//if (_velocity.Size() > MaxSpeed) //p5.limit()
+	//{
+	//	auto mag = _velocity.Size();
+	//	_velocity /= mag;
+	//	_velocity *= MaxSpeed;
+	//}
 }
 
 void ABoid::OnActorOverlap(AActor *SelfActor, AActor *OtherActor, FVector NormalImpulse, const FHitResult &Hit)
