@@ -75,29 +75,56 @@ void ABoid::Tick(float DeltaTime, FVector alignmentSteering, FVector cohesionSte
 {
 	if (!alignmentSteering.IsZero())
 	{
+		alignmentSteering.Normalize();
+		alignmentSteering *= MaxSpeed;
 		alignmentSteering = alignmentSteering - _velocity;
-		alignmentSteering /= alignmentSteering.Size();
-		alignmentSteering *= 1.0f; //(align_intensity/10)
+
+		if (alignmentSteering.SizeSquared() > (MaxSteeringForce * MaxSteeringForce))
+		{
+			alignmentSteering.Normalize();
+			alignmentSteering *= MaxSteeringForce;
+		}
 	}
 
 	if (!cohesionSteering.IsZero())
 	{
 		cohesionSteering = cohesionSteering - this->GetActorLocation();
+		cohesionSteering.Normalize();
+		cohesionSteering *= MaxSpeed;
 		cohesionSteering = cohesionSteering - _velocity;
-		cohesionSteering /= cohesionSteering.Size();
-		cohesionSteering *= 0.6f; //(cohesion_intensity/10)
+
+		if (cohesionSteering.SizeSquared() > (MaxSteeringForce * MaxSteeringForce))
+		{
+
+			cohesionSteering.Normalize();
+			cohesionSteering *= MaxSteeringForce; 
+		}
 	}
 
 	if (!separationSteering.IsZero())
 	{
-		separationSteering /= separationSteering.Size();
-		separationSteering *= 1.0f; //(steering_intensity/10)
+		separationSteering.Normalize();
+		separationSteering *= MaxSpeed;
+		separationSteering = separationSteering - _velocity;
+		if (separationSteering.SizeSquared() > (MaxSteeringForce * MaxSteeringForce))
+		{
+			separationSteering.Normalize();
+			separationSteering *= MaxSteeringForce;
+		}
+		separationSteering *= 1.5f;
 	}
 	
 	_acceleration = alignmentSteering + cohesionSteering + separationSteering;
-	FVector displacement = _velocity;
+	
+	_velocity = _velocity + _acceleration;
+	if (_velocity.Size() > MaxSpeed)
+	{
+		_velocity /= _velocity.Size();
+		_velocity *= MaxSpeed;
+	}	
+
 	FVector location = GetActorLocation();
-	location += displacement;
+	location += _velocity;
 	location.Z = 250.0f;
 	//this is used to rotation the body of the boid in the direction it is moving
 	float headingAngle = _velocity.HeadingAngle();
@@ -105,9 +132,6 @@ void ABoid::Tick(float DeltaTime, FVector alignmentSteering, FVector cohesionSte
 	FQuat quat = FQuat(FVector(0, 0, 1), headingAngle);
 
 	SetActorLocationAndRotation(location, quat, false, nullptr, ETeleportType::None);
-
-	_acceleration.Normalize(MaxSpeed);
-	_velocity = _velocity + _acceleration;
 
 	_acceleration = FVector::ZeroVector;
 

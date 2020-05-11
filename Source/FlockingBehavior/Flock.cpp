@@ -80,20 +80,20 @@ void UFlock::TickComponent(float DeltaTime)
 		else
 		{
 			//sort the boids here
-			SortBoids();
+			//SortBoids();
 
-			_width = _ySet.Num();
-			_depth = _xSet.Num();
-			_height = _zSet.Num();
+			//_width = _ySet.Num();
+			//_depth = _xSet.Num();
+			//_height = _zSet.Num();
 
-			//UE_LOG(FlockingBehaviorLogs, Warning, TEXT("_width %d, _height %d, _depth %d"), _width, _height, _depth);
+			////UE_LOG(FlockingBehaviorLogs, Warning, TEXT("_width %d, _height %d, _depth %d"), _width, _height, _depth);
 
-			_xSet.Empty();
-			_ySet.Empty();
-			_zSet.Empty();
+			//_xSet.Empty();
+			//_ySet.Empty();
+			//_zSet.Empty();
 
 			//for(auto& boid : _boids)
-			for (int i = 0; i < numberOfBoids; i++)
+			for (int i = 0; i < numberOfBoids; ++i)
 			{
 				auto boid = _boids[i];
 
@@ -113,106 +113,55 @@ void UFlock::TickComponent(float DeltaTime)
 				int cohesionCount = 0;
 				int separationCount = 0;
 
-				int maxLimit = 25;
-				int minLimit = -1* maxLimit;
-
-				for (int x = minLimit; x <= maxLimit; x++)
+				for (int neighborIndex = 0; neighborIndex < numberOfBoids; ++neighborIndex)
 				{
-					for (int y = minLimit; y <= maxLimit; y++)
+					if (_boids.IsValidIndex(neighborIndex) && neighborIndex != i)
 					{
-						for (int z = minLimit; z <= maxLimit; z++)
+						//check if this object is in vicinity and in vision
+						auto neighbor = _boids[neighborIndex];
+
+						//UE_LOG(FlockingBehaviorLogs, Warning, TEXT("The boid at: %d is at location x: %f, y: %f, z: %f"), i, boid->GetTransform().GetLocation().X, boid->GetTransform().GetLocation().Y, boid->GetTransform().GetLocation().Z);
+
+						//distance is sqrt((x2-x2)^2 + (y2-y1)^2 + (z2-z1)^2)
+						float distance = FVector::Distance(boid->GetTransform().GetLocation(), neighbor->GetTransform().GetLocation());
+
+						//check if the neighbor is visible by the boid
+
+						FVector boidDirectionVector = boid->GetActorForwardVector();
+
+						FVector subVector = neighbor->GetTransform().GetLocation() - boid->GetTransform().GetLocation();
+						subVector.Normalize();
+
+						float angle = FMath::RadiansToDegrees(FMath::Acos(FVector::DotProduct(boidDirectionVector, subVector)));
+
+						//this is a valid neighbor
+						//if (FVector::DotProduct(boidDirectionVector, subVector) >= FMath::Cos(FMath::DegreesToRadians(BoidFOV/2.0f)))
+						if (angle <= BoidFOV)
 						{
-							if (indices.Z == 0)
+							//if (i == numberOfBoids / 2)
+							//{
+							//	UE_LOG(FlockingBehaviorLogs, Warning, TEXT("neighborIndices.X %f, neighborIndices.Y %f, neighborIndices.Z %f and neighborIndex %d"), neighborIndices.X, neighborIndices.Y, neighborIndices.Z, neighborIndex);
+							//}
+							if (distance <= 200.0f)
 							{
-								if (_height == 1 && z != 0) continue;
-								if (_height > 1 && z < 0) continue;
-							}
-							else if (indices.Z == _height - 1)
-							{
-								if (z >= 1) continue;
-							}
-
-							if (indices.Y == 0)
-							{
-								if (_width == 1 && y != 0) continue;
-								if (_width > 1 && y < 0) continue;
-							}
-							else if (indices.Y == _width - 1)
-							{
-								if (y >= 1) continue;
+								alignment += neighbor->GetVelocity();
+								alignmentCount++;
 							}
 
-							if (indices.X == 0)
+							if (distance <= 200.0f)
 							{
-								if (_depth == 1 && x != 0) continue;
-								if (_depth > 1 && x < 0) continue;
-							}
-							else if (indices.X == _depth - 1)
-							{
-								if (x >= 1) continue;
+								cohesion += neighbor->GetTransform().GetLocation();
+								cohesionCount++;
 							}
 
-							FVector neighborIndices;
-
-							neighborIndices.X = indices.X + x;
-							neighborIndices.Y = indices.Y + y;
-							neighborIndices.Z = indices.Z + z;
-
-							if (neighborIndices.X < 0.0f || neighborIndices.Y < 0.0f || neighborIndices.Z < 0.0f) continue;
-
-							int neighborIndex;
-							GetFlatIndex(neighborIndices, neighborIndex);
-
-							//UE_LOG(FlockingBehaviorLogs, Warning, TEXT("neighborIndices.X %f, neighborIndices.Y %f, neighborIndices.Z %f and neighborIndex %d"), neighborIndices.X, neighborIndices.Y, neighborIndices.Z, neighborIndex);
-
-							if (_boids.IsValidIndex(neighborIndex) && neighborIndex != i)
+							//separation logic will happen here
+							if (distance <= 150.0f)
 							{
-								//check if this object is in vicinity and in vision
-								auto neighbor = _boids[neighborIndex];
-
-								//UE_LOG(FlockingBehaviorLogs, Warning, TEXT("The boid at: %d is at location x: %f, y: %f, z: %f"), i, boid->GetTransform().GetLocation().X, boid->GetTransform().GetLocation().Y, boid->GetTransform().GetLocation().Z);
-
-								//distance is sqrt((x2-x2)^2 + (y2-y1)^2 + (z2-z1)^2)
-								float distance = FVector::Distance(boid->GetTransform().GetLocation(), neighbor->GetTransform().GetLocation());
-
-								//check if the neighbor is visible by the boid
-
-								FVector boidDirectionVector = boid->GetActorForwardVector();
-
-								FVector subVector = neighbor->GetTransform().GetLocation() - boid->GetTransform().GetLocation();
-								subVector.Normalize();
-
-								float angle = FMath::RadiansToDegrees(FMath::Acos(FVector::DotProduct(boidDirectionVector, subVector)));
-
-								//this is a valid neighbor
-								//if (FVector::DotProduct(boidDirectionVector, subVector) >= FMath::Cos(FMath::DegreesToRadians(BoidFOV/2.0f)))
-								if (angle <= BoidFOV)
-								{
-									//if (i == numberOfBoids / 2)
-									//{
-									//	UE_LOG(FlockingBehaviorLogs, Warning, TEXT("neighborIndices.X %f, neighborIndices.Y %f, neighborIndices.Z %f and neighborIndex %d"), neighborIndices.X, neighborIndices.Y, neighborIndices.Z, neighborIndex);
-									//}
-									if (distance <= 100.0f)
-									{
-										alignment += neighbor->GetVelocity();
-										alignmentCount++;
-									}
-
-									if (distance <= 100.0f)
-									{
-										cohesion += neighbor->GetTransform().GetLocation();
-										cohesionCount++;
-									}
-
-									//separation logic will happen here
-									if (distance <= 100.0f)
-									{
-										FVector separationSubVector = boid->GetTransform().GetLocation() - neighbor->GetTransform().GetLocation();
-										separationSubVector.Normalize(1.0f / distance);
-										separation += separationSubVector;
-										separationCount++;
-									}
-								}
+								FVector separationSubVector = boid->GetTransform().GetLocation() - neighbor->GetTransform().GetLocation();
+								separationSubVector.Normalize();
+								separationSubVector /= distance;
+								separation += separationSubVector;
+								separationCount++;
 							}
 						}
 					}
