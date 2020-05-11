@@ -45,13 +45,13 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Boid")
 	float MaxSteeringForce;
 
-	FVector GetDirectionVector();
+	//FVector GetDirectionVector();
 
 	FVector GetVelocity();
 
 private:
 
-	static float _speed;
+	//static float _speed;
 
 	FVector _acceleration;
 
@@ -65,8 +65,8 @@ private:
 	UPROPERTY()
 	UWorld* _world;
 
-	UPROPERTY()
-	FVector _directionVector;
+	//UPROPERTY()
+	//FVector _directionVector;
 
 protected:
 	// Called when the game starts or when spawned
@@ -74,7 +74,7 @@ protected:
 
 public:	
 	// Called every frame
-	void Tick(float DeltaTime, float alignmentAngle, FVector alignmentSteering, FVector cohesionSteering, FVector separationSteering);
+	void Tick(float DeltaTime, FVector alignmentSteering = FVector::ZeroVector, FVector cohesionSteering = FVector::ZeroVector, FVector separationSteering = FVector::ZeroVector);
 
   UFUNCTION()
      void OnActorOverlap(AActor* SelfActor, AActor* OtherActor, FVector NormalImpulse, const FHitResult& Hit);

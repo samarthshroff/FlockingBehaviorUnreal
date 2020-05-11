@@ -5,7 +5,7 @@
 
 DEFINE_LOG_CATEGORY(FlockingBehaviorLogs)
 
-float ABoid::_speed = -1.0f;
+//float ABoid::_speed = -1.0f;
 
 // Sets default values
 ABoid::ABoid()
@@ -20,10 +20,10 @@ ABoid::ABoid()
 	Mesh->SetupAttachment(RootComponent);
 }
 
-FVector ABoid::GetDirectionVector()
-{
-	return _directionVector;
-}
+//FVector ABoid::GetDirectionVector()
+//{
+//	return _directionVector;
+//}
 
 FVector ABoid::GetVelocity()
 {
@@ -35,10 +35,10 @@ void ABoid::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (ABoid::_speed == -1.0f)
-	{
-		_speed = FMath::RandRange(MaxSpeed*0.5f, MaxSpeed);
-	}
+	//if (ABoid::_speed == -1.0f)
+	//{
+	//	_speed = FMath::RandRange(MaxSpeed*0.5f, MaxSpeed);
+	//}
 
 	_world = GetWorld();
 	//code to detect overlap
@@ -46,19 +46,24 @@ void ABoid::BeginPlay()
 	scriptDelegate.BindUFunction(this, FName("OnActorOverlap"));
 	OnActorBeginOverlap.Add(scriptDelegate);
 
-	_velocity.X = FMath::Cos(FMath::DegreesToRadians(DirectionAngle));
-	_velocity.Y = FMath::Sin(FMath::DegreesToRadians(DirectionAngle));
+	float angle = FMath::RandRange(-40.0f, 40.0f);// (-1, 1)* (i + 1) * 10.0f;
 
-	//_directionVector.Normalize();
-	////_velocity = _speed * _directionVector;
-	//_velocity = _directionVector;
-	_velocity *= _speed;
-	if (_velocity.SizeSquared() > FMath::Square(MaxSpeed)) //p5.limit()
-	{
-		auto mag = _velocity.Size();
-		_velocity /= mag;
-		_velocity *= MaxSpeed;
-	}
+	_velocity.X = FMath::Cos(FMath::DegreesToRadians(angle));
+	_velocity.Y = FMath::Sin(FMath::DegreesToRadians(angle));
+
+	_velocity.Normalize();
+	_velocity *= MaxSpeed;// FMath::RandRange(MaxSpeed * 0.5f, MaxSpeed);
+	//if (_velocity.SizeSquared() > FMath::Square(MaxSpeed)) //p5.limit()
+	//{
+	//	_velocity /= _velocity.Size();
+	//	_velocity *= MaxSpeed;
+	//}
+
+	float headingAngle = _velocity.HeadingAngle();
+	//only in z because we want to rotate the boid in yaw, in xy plane
+	FQuat quat = FQuat(FVector(0, 0, 1), headingAngle);
+
+	SetActorLocationAndRotation(GetActorLocation(), quat, false, nullptr, ETeleportType::None);
 
 	FVector origin;
 	GetActorBounds(true, origin, _actorBounds);
@@ -66,110 +71,36 @@ void ABoid::BeginPlay()
 }
 
 // Called every frame
-void ABoid::Tick(float DeltaTime, float alignmentAngle, FVector alignmentSteering, FVector cohesionSteering, FVector separationSteering)
+void ABoid::Tick(float DeltaTime, FVector alignmentSteering, FVector cohesionSteering, FVector separationSteering)
 {
-	//the three vectors - alignment, cohesion and sepration will affect the velocity here
-
-	//if (alignmentAngle != DirectionAngle) //!alignment.IsZero())
-	//{
-	//	DirectionAngle = alignmentAngle;
-
-	//	UE_LOG(FlockingBehaviorLogs, Warning, TEXT("the direction angle is:: %f "), DirectionAngle);
-
-	//	_directionVector.X = FMath::Cos(FMath::DegreesToRadians(DirectionAngle));
-	//	_directionVector.Y = FMath::Sin(FMath::DegreesToRadians(DirectionAngle));
-
-	//	////_directionVector = alignment;
-	//	//always go in the direction of neighbor but with max speed
-
-	//	_directionVector.Normalize();
-	//	_directionVector *= MaxSpeed;
-	//}
-
-	//alignmentSteering = FVector::ZeroVector;
-	//cohesionSteering = FVector::ZeroVector;
-	//separationSteering = FVector::ZeroVector;
-
-	//MaxSteeringForce = MaxSpeed * DeltaTime * 10.0f;
-
 	if (!alignmentSteering.IsZero())
 	{
-		//alignmentSteering = alignment;
-
-		//DirectionAngle = FMath::RadiansToDegrees(FMath::Acos(_directionVector.X));
-
-		//these 2 lines are p5.setMag Normalize() should give the same output. need to check 
-		//alignmentSteering /= alignmentSteering.Size();
-		//alignmentSteering *= MaxSpeed;
-
-		//steering = desired - velocity
 		alignmentSteering = alignmentSteering - _velocity;
-		//if (alignmentSteering.SizeSquared() > FMath::Square(1.0f)) //p5.limit()
-		{
-			alignmentSteering /= alignmentSteering.Size();
-			alignmentSteering *= 1.0f;
-		}
-
-		
-		//UE_LOG(FlockingBehaviorLogs, Warning, TEXT("_directionVector.X:: %f _directionVector.Y: %f _directionVector.Z: %f"), _directionVector.X, _directionVector.Y, _directionVector.Z);
+		alignmentSteering /= alignmentSteering.Size();
+		alignmentSteering *= 1.0f; //(align_intensity/10)
 	}
 
 	if (!cohesionSteering.IsZero())
 	{
 		cohesionSteering = cohesionSteering - this->GetActorLocation();
-
-		//cohesionSteering /= cohesionSteering.Size();
-		//cohesionSteering *= MaxSpeed;
-
 		cohesionSteering = cohesionSteering - _velocity;
-		//if (cohesionSteering.SizeSquared() > FMath::Square(0.6f)) //p5.limit()
-		{
-			cohesionSteering /= cohesionSteering.Size();
-			cohesionSteering *= 0.6f;
-		}
+		cohesionSteering /= cohesionSteering.Size();
+		cohesionSteering *= 0.6f; //(cohesion_intensity/10)
 	}
 
 	if (!separationSteering.IsZero())
 	{
-		//separationSteering /= separationSteering.Size();
-		//separationSteering *= MaxSpeed;
-
-		//separationSteering = separationSteering - _velocity;
-		//if (separationSteering.SizeSquared() > FMath::Square(2.0f)) //p5.limit()
-		{
-			separationSteering /= separationSteering.Size();
-			separationSteering *= 1.0f;
-		}
-
-		//separationSteering *= 2.0f;
-		//UE_LOG(FlockingBehaviorLogs, Warning, TEXT("separationSteering is: X %f Y %f Z %f and MaxSteeringForce %f "), separationSteering.X, separationSteering.Y, separationSteering.Z, MaxSteeringForce);
+		separationSteering /= separationSteering.Size();
+		separationSteering *= 1.0f; //(steering_intensity/10)
 	}
 	
 	_acceleration = alignmentSteering + cohesionSteering + separationSteering;
-	//_velocity += _acceleration;
-
-	//_acceleration = FVector::ZeroVector;
-
-	//if (_velocity.Size() > MaxSpeed) //p5.limit()
-	//{
-	//	auto mag = _velocity.Size();
-	//	_velocity /= mag;
-	//	_velocity *= MaxSpeed;
-	//}
-	//UE_LOG(FlockingBehaviorLogs, Warning, TEXT("_acceleration is: X %f Y %f Z %f"), _acceleration.X, _acceleration.Y, _acceleration.Z);
-	//UE_LOG(FlockingBehaviorLogs, Warning, TEXT("velocity before applying to displacement is: X %f Y %f Z %f and DeltaTime %f"), _velocity.X, _velocity.Y, _velocity.Z, DeltaTime);
-
-	FVector displacement = _velocity;// *DeltaTime;
-	//UE_LOG(FlockingBehaviorLogs, Warning, TEXT(" displacement is: X %f Y %f Z %f "), displacement.X, displacement.Y, displacement.Z);
-	//UE_LOG(FlockingBehaviorLogs, Warning, TEXT(" displacement * _velocity.Size() is: X %f Y %f Z %f "), (displacement * _velocity.Size()).X, (displacement * _velocity.Size()).Y, (displacement * _velocity.Size()).Z);
+	FVector displacement = _velocity;
 	FVector location = GetActorLocation();
 	location += displacement;
-
-	//SetActorLocation(location);
-
-	////this is used to rotation the body of the boid in the direction it is moving
+	location.Z = 250.0f;
+	//this is used to rotation the body of the boid in the direction it is moving
 	float headingAngle = _velocity.HeadingAngle();
-
 	//only in z because we want to rotate the boid in yaw, in xy plane
 	FQuat quat = FQuat(FVector(0, 0, 1), headingAngle);
 
@@ -180,22 +111,37 @@ void ABoid::Tick(float DeltaTime, float alignmentAngle, FVector alignmentSteerin
 
 	_acceleration = FVector::ZeroVector;
 
-	//if (_velocity.Size() > MaxSpeed) //p5.limit()
-	//{
-	//	auto mag = _velocity.Size();
-	//	_velocity /= mag;
-	//	_velocity *= MaxSpeed;
-	//}
+	//code for detecting world static obstacles
+	FVector forwardVector = GetActorForwardVector();
+	FVector newVector = FVector(_actorBounds.X * forwardVector.X, _actorBounds.Y * forwardVector.Y, _actorBounds.Z * forwardVector.Z);
+	FVector start = GetActorLocation() + newVector;
+	FVector end = forwardVector * FarSightness + start;
+	FHitResult hitResult;
+	FCollisionQueryParams collisionParams;
+
+	//DrawDebugLine(GetWorld(),start,end,FColor::Blue,true,-1.0f,0,2.0f);
+	//UE_LOG(FlockingBehaviorLogs,Warning,TEXT("start %s and end is %s "),*(start.ToString()),*(end.ToString()));
+
+	if (_world->LineTraceSingleByObjectType(hitResult, start, end, ECC_WorldStatic, collisionParams))
+	{		
+		//UE_LOG(FlockingBehaviorLogs,Warning,TEXT("found something*************  "));
+
+		_velocity = _velocity - 2 * (_velocity * hitResult.Normal) * hitResult.Normal;
+
+		//calculate the angle by which the boid will turn or rotate. For now just consider that the boid will make a kind of u-turn
+		//We will add the moving around a static object afterwards
+		//TO-DO add logic to move around a world static object like pillars
+	}
 }
 
 void ABoid::OnActorOverlap(AActor *SelfActor, AActor *OtherActor, FVector NormalImpulse, const FHitResult &Hit)
 {
-	//TArray<UStaticMeshComponent> StaticComps;
-	//OtherActor->GetComponents< UStaticMeshComponent>(StaticComps);
-	UE_LOG(FlockingBehaviorLogs, Warning, TEXT("self actor %s hit with: %s"), *(SelfActor->GetFullName()), *(OtherActor->GetFullName()));
+	////TArray<UStaticMeshComponent> StaticComps;
+	////OtherActor->GetComponents< UStaticMeshComponent>(StaticComps);
+	//UE_LOG(FlockingBehaviorLogs, Warning, TEXT("self actor %s hit with: %s"), *(SelfActor->GetFullName()), *(OtherActor->GetFullName()));
 
-	FVector origin;
-	FVector boidBounds;
-	OtherActor->GetActorBounds(true, origin, boidBounds);
-	UE_LOG(FlockingBehaviorLogs, Warning, TEXT("The bounds of %s are w: %f, h: %f, d: %f"), *(OtherActor->GetFullName()), boidBounds.X, boidBounds.Y, boidBounds.Z);
+	//FVector origin;
+	//FVector boidBounds;
+	//OtherActor->GetActorBounds(true, origin, boidBounds);
+	//UE_LOG(FlockingBehaviorLogs, Warning, TEXT("The bounds of %s are w: %f, h: %f, d: %f"), *(OtherActor->GetFullName()), boidBounds.X, boidBounds.Y, boidBounds.Z);
 }
