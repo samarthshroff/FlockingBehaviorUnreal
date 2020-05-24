@@ -45,13 +45,22 @@ void UFlock::Initialize(class AActor* boidsOwner, TSubclassOf<class ABoid> boidB
 		tempBoid->Destroy();
 		auto maxComponent = boidBounds.GetMax();
 		SeparationRadius = FMath::Max(SeparationRadius, maxComponent * 1.5f);
+		/*	FlockingBehaviorLogs: Warning: The boid at: 0 is at location x: -2171.822266, y:  2120.749512, z: 250.000000
+			FlockingBehaviorLogs: Warning: The boid at: 1 is at location x: -2259.324951, y:  2282.875977, z: 250.000000
+			FlockingBehaviorLogs: Warning: The boid at: 2 is at location x:  1757.423828, y: -1307.333496, z: 250.000000
+			FlockingBehaviorLogs: Warning: The boid at: 3 is at location x: -189.852539, y:  -2804.278809, z: 250.000000
+			FlockingBehaviorLogs: Warning: The boid at: 4 is at location x:  2473.338867, y: -3065.211914, z: 250.000000*/
 
-		for (int i = 0; i < 200; i++)
+		auto x = new float[5] { -2171.822266, -2259.324951,  1757.423828, -189.852539,   2473.338867};
+		auto y = new float[5] {  2120.749512,  2282.875977, -1307.333496, -2804.278809, -3065.211914 };
+
+		for (int i = 0; i < 5; i++)
 		{
 			FString name = "Boid";
 			name.AppendInt(i);
 			//
-			FTransform transform = FTransform(FVector(FMath::FRandRange(-3100.0f, 2500.0f), FMath::FRandRange(-3800.0f, 3800.0f), 250.0f));
+			FTransform transform = FTransform(FVector(x[i], y[i], 250.0f));
+			//FTransform transform = FTransform(FVector(FMath::FRandRange(-3100.0f, 2500.0f), FMath::FRandRange(-3800.0f, 3800.0f), 250.0f));
 			//FTransform transform = FTransform(FVector(FMath::FRandRange(-3160.0f, -2160.0f), FMath::FRandRange(-400.0f,350.0f), 250.0f));
 			//need to defer the spawning as we need to set the direction angle before boids BeginPlay is called
 			auto boid = world->SpawnActorDeferred<ABoid>(_boidBPClass, transform, _boidOwner);
@@ -61,6 +70,21 @@ void UFlock::Initialize(class AActor* boidsOwner, TSubclassOf<class ABoid> boidB
 			UGameplayStatics::FinishSpawningActor(boid, transform);
 
 			AddBoidToArray(boid);
+
+			UE_LOG(FlockingBehaviorLogs, Warning, TEXT("The boid at: %d is at location x: %f, y: %f, z: %f"), i, boid->GetTransform().GetLocation().X, boid->GetTransform().GetLocation().Y, boid->GetTransform().GetLocation().Z);
+		}
+		UE_LOG(FlockingBehaviorLogs, Warning, TEXT("_width %d _height %d _depth %d"), _width, _height, _depth);
+
+		SortBoids();
+
+		UE_LOG(FlockingBehaviorLogs, Warning, TEXT("After sort"));
+		UE_LOG(FlockingBehaviorLogs, Warning, TEXT("_width %d _height %d _depth %d"), _width, _height, _depth);
+
+		for (int i = 0; i < 5; i++)
+		{
+			auto boid = _boids[i];
+
+			UE_LOG(FlockingBehaviorLogs, Warning, TEXT("The boid at: %d is at location x: %f, y: %f, z: %f"), i, boid->GetTransform().GetLocation().X, boid->GetTransform().GetLocation().Y, boid->GetTransform().GetLocation().Z);
 		}
 	}
 
@@ -113,7 +137,7 @@ void UFlock::TickComponent(float DeltaTime)
 				int cohesionCount = 0;
 				int separationCount = 0;
 
-				int maxLimit = 25;
+				int maxLimit = 4;
 				int minLimit = -1* maxLimit;
 
 				for (int x = minLimit; x <= maxLimit; x++)
@@ -192,23 +216,24 @@ void UFlock::TickComponent(float DeltaTime)
 									//{
 									//	UE_LOG(FlockingBehaviorLogs, Warning, TEXT("neighborIndices.X %f, neighborIndices.Y %f, neighborIndices.Z %f and neighborIndex %d"), neighborIndices.X, neighborIndices.Y, neighborIndices.Z, neighborIndex);
 									//}
-									if (distance <= 100.0f)
+									if (distance <= 200.0f)
 									{
 										alignment += neighbor->GetVelocity();
 										alignmentCount++;
 									}
 
-									if (distance <= 100.0f)
+									if (distance <= 200.0f)
 									{
 										cohesion += neighbor->GetTransform().GetLocation();
 										cohesionCount++;
 									}
 
 									//separation logic will happen here
-									if (distance <= 100.0f)
+									if (distance <= 150.0f)
 									{
 										FVector separationSubVector = boid->GetTransform().GetLocation() - neighbor->GetTransform().GetLocation();
-										separationSubVector.Normalize(1.0f / distance);
+										separationSubVector.Normalize();
+										separationSubVector /= distance;
 										separation += separationSubVector;
 										separationCount++;
 									}
@@ -296,21 +321,46 @@ void UFlock::SortBoids()
 	_dimensionToCompare = Compare::Depth;
 	QuickSort(0, _gridSize - 1);
 
-	//sort one depth at a time w.r.t height so we will have each layer sorted w.r.t Z
-	_dimensionToCompare = Compare::Height;
-	for (int i = 0; i < _depth; ++i)
+	UE_LOG(FlockingBehaviorLogs, Warning, TEXT("After X or depth wise sort"));
+	for (int i = 0; i < 5; i++)
 	{
-		if (!_boids.IsValidIndex((i * _width * _height))) break;
-		QuickSort((i * _width * _height), ((i + 1) * _width * _height) - 1);
+		auto boid = _boids[i];
+
+		UE_LOG(FlockingBehaviorLogs, Warning, TEXT("The boid at: %d is at location x: %f, y: %f, z: %f"), i, boid->GetTransform().GetLocation().X, boid->GetTransform().GetLocation().Y, boid->GetTransform().GetLocation().Z);
 	}
 
-	//now that we have sorted the array w.r.t. X and Z sort each row which represents width (Y) 
-	_dimensionToCompare = Compare::Width;
-	for (int i = 0; i < (_depth * _height); ++i)
-	{
-		if (!_boids.IsValidIndex((i * _width))) break;
-		QuickSort((i * _width), ((i + 1) * _width) - 1);
-	}
+	////sort one depth at a time w.r.t height so we will have each layer sorted w.r.t Z
+	//_dimensionToCompare = Compare::Height;
+	//for (int i = 0; i < _depth; ++i)
+	//{
+	//	if (!_boids.IsValidIndex((i * _width * _height))) break;
+	//	QuickSort((i * _width * _height), ((i + 1) * _width * _height) - 1);
+	//}
+
+	//UE_LOG(FlockingBehaviorLogs, Warning, TEXT("After Z or height wise sort"));
+	//for (int i = 0; i < 5; i++)
+	//{
+	//	auto boid = _boids[i];
+
+	//	UE_LOG(FlockingBehaviorLogs, Warning, TEXT("The boid at: %d is at location x: %f, y: %f, z: %f"), i, boid->GetTransform().GetLocation().X, boid->GetTransform().GetLocation().Y, boid->GetTransform().GetLocation().Z);
+	//}
+
+	////now that we have sorted the array w.r.t. X and Z sort each row which represents width (Y) 
+	//_dimensionToCompare = Compare::Width;
+	//for (int i = 0; i < (_depth * _height); ++i)
+	//{
+	//	if (!_boids.IsValidIndex((i * _width))) break;
+	//	QuickSort((i * _width), ((i + 1) * _width) - 1);
+	//}
+
+	//UE_LOG(FlockingBehaviorLogs, Warning, TEXT("After Y or width wise sort"));
+
+	//for (int i = 0; i < 5; i++)
+	//{
+	//	auto boid = _boids[i];
+
+	//	UE_LOG(FlockingBehaviorLogs, Warning, TEXT("The boid at: %d is at location x: %f, y: %f, z: %f"), i, boid->GetTransform().GetLocation().X, boid->GetTransform().GetLocation().Y, boid->GetTransform().GetLocation().Z);
+	//}
 }
 
 void UFlock::QuickSort(int low, int high)
@@ -363,13 +413,44 @@ int UFlock::Partition(int low, int high)
 			_zSet.Add(lhsBoidVector.Z);
 		}
 
-		if ((_dimensionToCompare == Compare::Depth && lhsBoidVector.X >= pivotVector.X) ||
-			(_dimensionToCompare == Compare::Width && lhsBoidVector.Y <= pivotVector.Y) ||
-			(_dimensionToCompare == Compare::Height && lhsBoidVector.Z >= pivotVector.Z))
+		//>= descending
+		//<= ascending
+		if (lhsBoidVector.X >= pivotVector.X)
 		{
-			++i;
-			_boids.SwapMemory(i, j);
+			if (lhsBoidVector.X > pivotVector.X)
+			{
+				++i;
+				_boids.SwapMemory(i, j);
+			}
+			else if (lhsBoidVector.X == pivotVector.X)
+			{
+				if (lhsBoidVector.Y <= pivotVector.Y)
+				{
+					if (lhsBoidVector.Y < pivotVector.Y)
+					{
+						++i;
+						_boids.SwapMemory(i, j);
+					}
+					else if (lhsBoidVector.Y == pivotVector.Y)
+					{
+						if (lhsBoidVector.Z >= pivotVector.Z)
+						{
+							++i;
+							_boids.SwapMemory(i, j);
+						}
+					}
+				}
+			}
 		}
+
+
+		//if ((_dimensionToCompare == Compare::Depth && lhsBoidVector.X >= pivotVector.X) ||
+		//	(_dimensionToCompare == Compare::Width && lhsBoidVector.Y <= pivotVector.Y) ||
+		//	(_dimensionToCompare == Compare::Height && lhsBoidVector.Z >= pivotVector.Z))
+		//{
+		//	++i;
+		//	_boids.SwapMemory(i, j);
+		//}
 	}
 
 	_boids.SwapMemory(i + 1, high);

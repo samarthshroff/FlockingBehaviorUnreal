@@ -14,24 +14,24 @@ class FLOCKINGBEHAVIOR_API ABoid : public AActor
 {
 	GENERATED_BODY()
 	
-public:	
+public:
 	// Sets default values for this actor's properties
 	ABoid();
 
 	UPROPERTY(VisibleAnywhere, BlueprintreadOnly)
-	USceneComponent* Scene;
+		USceneComponent* Scene;
 
 	UPROPERTY(VisibleAnywhere, BlueprintreadOnly)
-	UStaticMeshComponent* Mesh;
+		UStaticMeshComponent* Mesh;
 
 	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Boid")
 	//FVector DirectionVector;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Boid", meta=(Tooltip="Angle in degrees."))
-	float DirectionAngle;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Boid", meta = (Tooltip = "Angle in degrees."))
+		float DirectionAngle;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flock", meta = (Tooltip = "Length of Ray cast (in cms) for checking forward collision with World Static objects, so that the boid can turn accordingly."))
-	float FarSightness;
+		float FarSightness;
 
 	////current speed by which each boid moves
 	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Boid")
@@ -39,11 +39,11 @@ public:
 
 	//The Speed variable will never cross this limit
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Boid")
-	float MaxSpeed;
+		float MaxSpeed;
 
 	//Steering will never cross this limit
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Boid")
-	float MaxSteeringForce;
+		float MaxSteeringForce;
 
 	//FVector GetDirectionVector();
 
@@ -57,13 +57,13 @@ private:
 
 	//speed * direction vector
 	UPROPERTY()
-	FVector _velocity;
+		FVector _velocity;
 
 	UPROPERTY()
-	FVector _actorBounds;
+		FVector _actorBounds;
 
 	UPROPERTY()
-	UWorld* _world;
+		UWorld* _world;
 
 	//UPROPERTY()
 	//FVector _directionVector;
@@ -72,12 +72,12 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-public:	
+public:
 	// Called every frame
 	void Tick(float DeltaTime, FVector alignmentSteering = FVector::ZeroVector, FVector cohesionSteering = FVector::ZeroVector, FVector separationSteering = FVector::ZeroVector);
 
-  UFUNCTION()
-     void OnActorOverlap(AActor* SelfActor, AActor* OtherActor, FVector NormalImpulse, const FHitResult& Hit);
+	UFUNCTION()
+		void OnActorOverlap(AActor* SelfActor, AActor* OtherActor, FVector NormalImpulse, const FHitResult& Hit);
 	
 };
 
