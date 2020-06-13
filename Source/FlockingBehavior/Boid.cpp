@@ -67,7 +67,6 @@ void ABoid::BeginPlay()
 
 	FVector origin;
 	GetActorBounds(true, origin, _actorBounds);
-	_actorBounds /= 2.0f;
 }
 
 // Called every frame
@@ -169,3 +168,12 @@ void ABoid::OnActorOverlap(AActor *SelfActor, AActor *OtherActor, FVector Normal
 	//OtherActor->GetActorBounds(true, origin, boidBounds);
 	//UE_LOG(FlockingBehaviorLogs, Warning, TEXT("The bounds of %s are w: %f, h: %f, d: %f"), *(OtherActor->GetFullName()), boidBounds.X, boidBounds.Y, boidBounds.Z);
 }
+
+//FBox ABoid::GetBoundingBox()
+//{
+//	FVector bounds;
+//	FVector center;
+//	GetActorBounds(true, center, bounds);
+//
+//	return FBox(FVector(center - bounds), FVector(center + bounds));
+//}

@@ -5,8 +5,10 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "Boid.h"
-#include "Flock.generated.h"
+#include "QuadTree.h"
 
+
+#include "Flock.generated.h"
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class FLOCKINGBEHAVIOR_API UFlock : public UActorComponent
@@ -55,6 +57,7 @@ private:
 	TSet<float> _ySet;
 	TSet<float> _zSet;
 
+	QuadTree* tree;
 public:	
 	// Sets default values for this component's properties
 	UFlock();

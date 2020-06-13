@@ -49,6 +49,8 @@ public:
 
 	FVector GetVelocity();
 
+	//FBox GetBoundingBox();
+
 private:
 
 	//static float _speed;

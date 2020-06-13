@@ -62,6 +62,11 @@ void UFlock::Initialize(class AActor* boidsOwner, TSubclassOf<class ABoid> boidB
 
 			AddBoidToArray(boid);
 		}
+
+		//tree = new Octree( FBox(FVector(-3202.0f,-3951.0f,195.0f),FVector(2692.0f,3951.0f,425.0f)), _boids);
+		tree = new QuadTree( FBox(FVector(-3202.0f,-3951.0f,250.0f),FVector(2692.0f,3951.0f,250.0f)), _boids);
+		tree->BuildTree();
+		int k = 0;
 	}
 
 	//UE_LOG(FlockingBehaviorLogs, Warning, TEXT("_width %d _height %d _depth %d"), _width, _height, _depth);
@@ -79,6 +84,109 @@ void UFlock::TickComponent(float DeltaTime)
 		}
 		else
 		{
+			for ( ABoid* boid : _boids)
+			{
+				ABoid& boidRef = *boid;
+				FString name = boid->GetName();
+				TArray<ABoid*> neighbors;
+				auto currentNode = *(tree->GetOctreeNode(boidRef));
+
+				currentNode.GetNeighbors(boidRef, currentNode, neighbors);
+				//UE_LOG(FlockingBehaviorLogs, Warning, TEXT("after get neighbors for boid:: %s"), *(name));
+				//OctreeNode* currentNode = tree->GetOctreeNode(boidRef);
+				//UE_LOG(FlockingBehaviorLogs, Warning, TEXT("after get octreenode for boid:: %s"), *(name));
+
+				FVector alignment = FVector::ZeroVector;
+				FVector separation = FVector::ZeroVector;
+				FVector cohesion = FVector::ZeroVector;
+				int alignmentCount = 0;
+				int cohesionCount = 0;
+				int separationCount = 0;
+
+				for (int neighborIndex = 0; neighborIndex < neighbors.Num(); ++neighborIndex)
+				{
+					//check if this object is in vicinity and in vision
+					auto neighbor = neighbors[neighborIndex];
+
+					//if (_boids.IsValidIndex(neighborIndex) && neighborIndex != i)
+					if(boid != neighbor)
+					{
+						//UE_LOG(FlockingBehaviorLogs, Warning, TEXT("The boid at: %d is at location x: %f, y: %f, z: %f"), i, boid->GetTransform().GetLocation().X, boid->GetTransform().GetLocation().Y, boid->GetTransform().GetLocation().Z);
+
+						//distance is sqrt((x2-x2)^2 + (y2-y1)^2 + (z2-z1)^2)
+						float distance = FVector::Distance(boid->GetTransform().GetLocation(), neighbor->GetTransform().GetLocation());
+
+						//check if the neighbor is visible by the boid
+
+						FVector boidDirectionVector = boid->GetActorForwardVector();
+
+						FVector subVector = neighbor->GetTransform().GetLocation() - boid->GetTransform().GetLocation();
+						subVector.Normalize();
+
+						float angle = FMath::RadiansToDegrees(FMath::Acos(FVector::DotProduct(boidDirectionVector, subVector)));
+
+						//this is a valid neighbor
+						//if (FVector::DotProduct(boidDirectionVector, subVector) >= FMath::Cos(FMath::DegreesToRadians(BoidFOV/2.0f)))
+						if (angle <= BoidFOV)
+						{
+							//if (i == numberOfBoids / 2)
+							//{
+							//	UE_LOG(FlockingBehaviorLogs, Warning, TEXT("neighborIndices.X %f, neighborIndices.Y %f, neighborIndices.Z %f and neighborIndex %d"), neighborIndices.X, neighborIndices.Y, neighborIndices.Z, neighborIndex);
+							//}
+							if (distance <= 200.0f)
+							{
+								alignment += neighbor->GetVelocity();
+								alignmentCount++;
+							}
+
+							if (distance <= 200.0f)
+							{
+								cohesion += neighbor->GetTransform().GetLocation();
+								cohesionCount++;
+							}
+
+							//separation logic will happen here
+							if (distance <= 150.0f)
+							{
+								//subtraction vector from boid to neighbor / distance = value by which boid has to separate from this neighbor
+								FVector separationSubVector = boid->GetTransform().GetLocation() - neighbor->GetTransform().GetLocation();
+								separationSubVector.Normalize();
+								separationSubVector /= distance;
+								separation += separationSubVector;
+								separationCount++;
+							}
+						}
+					}
+				}
+
+				if (alignmentCount > 0)
+				{
+					alignment /= alignmentCount;
+				}
+				if (cohesionCount > 0)
+				{
+					cohesion /= cohesionCount;
+				}
+
+				if (separationCount > 0)
+				{
+					separation /= separationCount;
+				}
+
+				boid->Tick(DeltaTime, alignment, cohesion, separation);
+
+				//UE_LOG(FlockingBehaviorLogs, Warning, TEXT("after tick of boid:: %s"), *(name));
+
+				if (!currentNode.IsInside(currentNode.region, boid->GetTransform().GetLocation()))
+				{
+					//UE_LOG(FlockingBehaviorLogs, Warning, TEXT("before UpdateBoidPositionInTree for boid:: %s"), *(name));
+					tree->UpdateBoidPositionInTree(boidRef, currentNode);
+					//UE_LOG(FlockingBehaviorLogs, Warning, TEXT("after UpdateBoidPositionInTree for boid:: %s"), *(name));
+				}
+			}
+			
+
+
 			//sort the boids here
 			//SortBoids();
 
@@ -93,7 +201,7 @@ void UFlock::TickComponent(float DeltaTime)
 			//_zSet.Empty();
 
 			//for(auto& boid : _boids)
-			for (int i = 0; i < numberOfBoids; ++i)
+			/*for (int i = 0; i < numberOfBoids; ++i)
 			{
 				auto boid = _boids[i];
 
@@ -157,6 +265,7 @@ void UFlock::TickComponent(float DeltaTime)
 							//separation logic will happen here
 							if (distance <= 150.0f)
 							{
+								//subtraction vector from boid to neighbor / distance = value by which boid has to separate from this neighbor
 								FVector separationSubVector = boid->GetTransform().GetLocation() - neighbor->GetTransform().GetLocation();
 								separationSubVector.Normalize();
 								separationSubVector /= distance;
@@ -182,7 +291,7 @@ void UFlock::TickComponent(float DeltaTime)
 				}
 
 				boid->Tick(DeltaTime, alignment, cohesion, separation);
-			}
+			}*/
 		}
 	}
 }
