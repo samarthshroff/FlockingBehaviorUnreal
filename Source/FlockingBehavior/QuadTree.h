@@ -19,7 +19,7 @@ public:
 	QuadTreeNode* root;
 
 	void GetNeighbors(const ABoid& boid, const QuadTreeNode& currentNode, TArray<ABoid*>& neighbors);
-	QuadTreeNode* GetOctreeNode(ABoid& boid);
+	QuadTreeNode* GetTreeNode(ABoid& boid);
 	void UpdateBoidPositionInTree(ABoid& boid, QuadTreeNode& node);
 	//TArray<ABoid*> boids;
 

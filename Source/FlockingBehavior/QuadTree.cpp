@@ -21,7 +21,7 @@ void QuadTree::GetNeighbors(const ABoid& boid, const QuadTreeNode& currentNode, 
 	}
 }
 
-QuadTreeNode* QuadTree::GetOctreeNode(ABoid& boid)
+QuadTreeNode* QuadTree::GetTreeNode(ABoid& boid)
 {
 	FVector boidPosition = boid.GetTransform().GetLocation();
 

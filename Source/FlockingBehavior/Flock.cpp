@@ -89,7 +89,7 @@ void UFlock::TickComponent(float DeltaTime)
 				ABoid& boidRef = *boid;
 				FString name = boid->GetName();
 				TArray<ABoid*> neighbors;
-				auto currentNode = *(tree->GetOctreeNode(boidRef));
+				auto currentNode = *(tree->GetTreeNode(boidRef));
 
 				currentNode.GetNeighbors(boidRef, currentNode, neighbors);
 				//UE_LOG(FlockingBehaviorLogs, Warning, TEXT("after get neighbors for boid:: %s"), *(name));
