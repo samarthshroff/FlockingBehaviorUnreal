@@ -72,17 +72,4 @@ protected:
 public:	
 	// Called every frame
 	void TickComponent(float DeltaTime);
-
-private:
-	void AddBoidToArray(class ABoid* boid);
-
-	void Get3DIndicies(int flatIndex, FVector& indices);
-
-	void GetFlatIndex(FVector& indices, int& flatIndex);
-
-	void SortBoids();
-
-	void QuickSort(int low, int high);
-
-	int Partition(int low, int high);
 };

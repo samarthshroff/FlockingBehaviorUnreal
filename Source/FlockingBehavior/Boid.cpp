@@ -105,6 +105,7 @@ void ABoid::Tick(float DeltaTime, FVector alignmentSteering, FVector cohesionSte
 		separationSteering.Normalize();
 		separationSteering *= MaxSpeed;
 		separationSteering = separationSteering - _velocity;
+
 		if (separationSteering.SizeSquared() > (MaxSteeringForce * MaxSteeringForce))
 		{
 			separationSteering.Normalize();
