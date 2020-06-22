@@ -9,7 +9,7 @@
 #define AWARENESS_RADIUS	200.0f
 #define ALIGNMENT_RADIUS	200.0f
 #define COHESION_RADIUS		200.0f
-#define SEPARATION_RADIUS	200.0f
+#define SEPARATION_RADIUS	150.0f
 
 // Sets default values for this component's properties
 UFlock::UFlock()
