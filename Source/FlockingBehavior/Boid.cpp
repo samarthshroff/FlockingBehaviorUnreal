@@ -5,8 +5,6 @@
 
 DEFINE_LOG_CATEGORY(FlockingBehaviorLogs)
 
-//float ABoid::_speed = -1.0f;
-
 // Sets default values
 ABoid::ABoid()
 {
@@ -20,11 +18,6 @@ ABoid::ABoid()
 	Mesh->SetupAttachment(RootComponent);
 }
 
-//FVector ABoid::GetDirectionVector()
-//{
-//	return _directionVector;
-//}
-
 FVector ABoid::GetVelocity()
 {
 	return _velocity;
@@ -35,16 +28,11 @@ void ABoid::BeginPlay()
 {
 	Super::BeginPlay();
 
-	//if (ABoid::_speed == -1.0f)
-	//{
-	//	_speed = FMath::RandRange(MaxSpeed*0.5f, MaxSpeed);
-	//}
-
 	_world = GetWorld();
-	//code to detect overlap
-	FScriptDelegate scriptDelegate;
-	scriptDelegate.BindUFunction(this, FName("OnActorOverlap"));
-	OnActorBeginOverlap.Add(scriptDelegate);
+	////code to detect overlap
+	//FScriptDelegate scriptDelegate;
+	//scriptDelegate.BindUFunction(this, FName("OnActorOverlap"));
+	//OnActorBeginOverlap.Add(scriptDelegate);
 
 	float angle = FMath::RandRange(-40.0f, 40.0f);// (-1, 1)* (i + 1) * 10.0f;
 
@@ -52,18 +40,9 @@ void ABoid::BeginPlay()
 	_velocity.Y = FMath::Sin(FMath::DegreesToRadians(angle));
 
 	_velocity.Normalize();
-	_velocity *= MaxSpeed;// FMath::RandRange(MaxSpeed * 0.5f, MaxSpeed);
-	//if (_velocity.SizeSquared() > FMath::Square(MaxSpeed)) //p5.limit()
-	//{
-	//	_velocity /= _velocity.Size();
-	//	_velocity *= MaxSpeed;
-	//}
+	_velocity *= MaxSpeed;
 
-	float headingAngle = _velocity.HeadingAngle();
-	//only in z because we want to rotate the boid in yaw, in xy plane
-	FQuat quat = FQuat(FVector(0, 0, 1), headingAngle);
-
-	SetActorLocationAndRotation(GetActorLocation(), quat, false, nullptr, ETeleportType::None);
+	GetRootComponent()->SetWorldRotation(_velocity.ToOrientationRotator());
 
 	FVector origin;
 	GetActorBounds(true, origin, _actorBounds);
@@ -125,14 +104,11 @@ void ABoid::Tick(float DeltaTime, FVector alignmentSteering, FVector cohesionSte
 
 	FVector location = GetActorLocation();
 	location += _velocity;
-	location.Z = 250.0f;
-	//this is used to rotation the body of the boid in the direction it is moving
-	float headingAngle = _velocity.HeadingAngle();
-	//only in z because we want to rotate the boid in yaw, in xy plane
-	FQuat quat = FQuat(FVector(0, 0, 1), headingAngle);
 
-	SetActorLocationAndRotation(location, quat, false, nullptr, ETeleportType::None);
-
+	//SetActorLocationAndRotation(location, quat, false, nullptr, ETeleportType::None);
+	SetActorLocation(location, false, nullptr, ETeleportType::None);	
+	GetRootComponent()->SetWorldRotation(_velocity.ToOrientationRotator());
+	
 	_acceleration = FVector::ZeroVector;
 
 	//code for detecting world static obstacles
@@ -158,23 +134,14 @@ void ABoid::Tick(float DeltaTime, FVector alignmentSteering, FVector cohesionSte
 	}
 }
 
-void ABoid::OnActorOverlap(AActor *SelfActor, AActor *OtherActor, FVector NormalImpulse, const FHitResult &Hit)
-{
-	////TArray<UStaticMeshComponent> StaticComps;
-	////OtherActor->GetComponents< UStaticMeshComponent>(StaticComps);
-	//UE_LOG(FlockingBehaviorLogs, Warning, TEXT("self actor %s hit with: %s"), *(SelfActor->GetFullName()), *(OtherActor->GetFullName()));
-
-	//FVector origin;
-	//FVector boidBounds;
-	//OtherActor->GetActorBounds(true, origin, boidBounds);
-	//UE_LOG(FlockingBehaviorLogs, Warning, TEXT("The bounds of %s are w: %f, h: %f, d: %f"), *(OtherActor->GetFullName()), boidBounds.X, boidBounds.Y, boidBounds.Z);
-}
-
-//FBox ABoid::GetBoundingBox()
+//void ABoid::OnActorOverlap(AActor *SelfActor, AActor *OtherActor, FVector NormalImpulse, const FHitResult &Hit)
 //{
-//	FVector bounds;
-//	FVector center;
-//	GetActorBounds(true, center, bounds);
+//	////TArray<UStaticMeshComponent> StaticComps;
+//	////OtherActor->GetComponents< UStaticMeshComponent>(StaticComps);
+//	//UE_LOG(FlockingBehaviorLogs, Warning, TEXT("self actor %s hit with: %s"), *(SelfActor->GetFullName()), *(OtherActor->GetFullName()));
 //
-//	return FBox(FVector(center - bounds), FVector(center + bounds));
+//	//FVector origin;
+//	//FVector boidBounds;
+//	//OtherActor->GetActorBounds(true, origin, boidBounds);
+//	//UE_LOG(FlockingBehaviorLogs, Warning, TEXT("The bounds of %s are w: %f, h: %f, d: %f"), *(OtherActor->GetFullName()), boidBounds.X, boidBounds.Y, boidBounds.Z);
 //}

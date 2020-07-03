@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "Boid.h"
-#include "QuadTree.h"
+#include "Octree.h"
 
 
 #include "Flock.generated.h"
@@ -57,7 +57,7 @@ private:
 	TSet<float> _ySet;
 	TSet<float> _zSet;
 
-	QuadTree* tree;
+	Octree* tree;
 public:	
 	// Sets default values for this component's properties
 	UFlock();

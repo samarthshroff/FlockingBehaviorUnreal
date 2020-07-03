@@ -24,18 +24,11 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintreadOnly)
 	UStaticMeshComponent* Mesh;
 
-	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Boid")
-	//FVector DirectionVector;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Boid", meta=(Tooltip="Angle in degrees."))
 	float DirectionAngle;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flock", meta = (Tooltip = "Length of Ray cast (in cms) for checking forward collision with World Static objects, so that the boid can turn accordingly."))
 	float FarSightness;
-
-	////current speed by which each boid moves
-	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Boid")
-	//float Speed;
 
 	//The Speed variable will never cross this limit
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Boid")
@@ -45,19 +38,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Boid")
 	float MaxSteeringForce;
 
-	//FVector GetDirectionVector();
-
 	FVector GetVelocity();
-
-	//FBox GetBoundingBox();
 
 private:
 
-	//static float _speed;
-
 	FVector _acceleration;
 
-	//speed * direction vector
 	UPROPERTY()
 	FVector _velocity;
 
@@ -67,9 +53,6 @@ private:
 	UPROPERTY()
 	UWorld* _world;
 
-	//UPROPERTY()
-	//FVector _directionVector;
-
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -77,16 +60,4 @@ protected:
 public:	
 	// Called every frame
 	void Tick(float DeltaTime, FVector alignmentSteering = FVector::ZeroVector, FVector cohesionSteering = FVector::ZeroVector, FVector separationSteering = FVector::ZeroVector);
-
-  UFUNCTION()
-     void OnActorOverlap(AActor* SelfActor, AActor* OtherActor, FVector NormalImpulse, const FHitResult& Hit);
-	
 };
-
-//USTRUCT()
-//struct FNeighborData
-//{
-//	float DirectionAngle;
-//	FVector Location;
-//	float Distance;
-//};
