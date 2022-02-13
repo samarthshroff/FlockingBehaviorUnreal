@@ -3,9 +3,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
+//#include "GameFramework/Pawn.h"
 #include "GameFramework/DefaultPawn.h"
-//#include "GameFramework/SpringArmComponent.h"
-//#include "Camera/CameraComponent.h"
+#include "GameFramework/SpringArmComponent.h"
+#include "Camera/CameraComponent.h"
 #include "Flock.h"
 #include "GameManager.generated.h"
 
@@ -13,32 +14,23 @@ UCLASS()
 class FLOCKINGBEHAVIOR_API AGameManager : public ADefaultPawn
 {
 	GENERATED_BODY()
-
 public:
 	// Sets default values for this actor's properties
 	AGameManager();
 
-	// UPROPERTY(VisibleAnywhere, BlueprintreadOnly)
-	// USceneComponent *RootComp;
-
-	// UPROPERTY(VisibleAnywhere, BlueprintreadOnly)
-	// USpringArmComponent *SpringArm;
-
-	// UPROPERTY(VisibleAnywhere, BlueprintreadOnly)
-	// UCameraComponent *Camera;
-
-	UPROPERTY(VisibleAnywhere, BlueprintreadOnly)
-	UFlock* Flock;
-
-private:
-	UPROPERTY(EditAnywhere)
-	TSubclassOf<class ABoid> _boidBPClass;
+	bool _startAI;
 
 protected:
 	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
+	virtual void
+	BeginPlay() override;
+
+	// Called to bind functionality to input
+	virtual void SetupPlayerInputComponent(class UInputComponent *InputComponent) override;
 
 public:
 	// Called every frame
 	void Tick(float DeltaTime) override;
-};
+
+private:
+		UFUNCTION()

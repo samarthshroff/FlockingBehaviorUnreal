@@ -1,6 +1,10 @@
 {
 	"FileVersion": 3,
+<<<<<<< HEAD
 	"EngineAssociation": "4.24",
+=======
+	"EngineAssociation": "4.27",
+>>>>>>> origin/simple-basic-algorithm
 	"Category": "",
 	"Description": "",
 	"Modules": [
