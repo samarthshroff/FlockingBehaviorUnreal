@@ -83,7 +83,7 @@ void ABoid::Tick(float DeltaTime, FVector alignmentSteering, FVector cohesionSte
 		{
 
 			cohesionSteering.Normalize();
-			cohesionSteering *= MaxSteeringForce; 
+			cohesionSteering *= MaxSteeringForce;
 		}
 		cohesionSteering *= cohesionWeight;
 	}
@@ -103,23 +103,23 @@ void ABoid::Tick(float DeltaTime, FVector alignmentSteering, FVector cohesionSte
 		}
 		separationSteering *= separationWeight;
 	}
-	
+
 	_acceleration = alignmentSteering + cohesionSteering + separationSteering;
-	
+
 	_velocity = _velocity + _acceleration;
 	if (_velocity.Size() > MaxSpeed)
 	{
 		_velocity /= _velocity.Size();
 		_velocity *= MaxSpeed;
-	}	
+	}
 
 	FVector location = GetActorLocation();
 	location += _velocity;
 
 	//SetActorLocationAndRotation(location, quat, false, nullptr, ETeleportType::None);
-	SetActorLocation(location, false, nullptr, ETeleportType::None);	
+	SetActorLocation(location, false, nullptr, ETeleportType::None);
 	GetRootComponent()->SetWorldRotation(_velocity.ToOrientationRotator());
-	
+
 	_acceleration = FVector::ZeroVector;
 
 	//code for detecting world static obstacles
@@ -134,7 +134,7 @@ void ABoid::Tick(float DeltaTime, FVector alignmentSteering, FVector cohesionSte
 	//UE_LOG(FlockingBehaviorLogs,Warning,TEXT("start %s and end is %s "),*(start.ToString()),*(end.ToString()));
 
 	if (_world->LineTraceSingleByObjectType(hitResult, start, end, ECC_WorldStatic, collisionParams))
-	{		
+	{
 		//UE_LOG(FlockingBehaviorLogs,Warning,TEXT("found something*************  "));
 
 		_velocity = _velocity - 2 * (_velocity * hitResult.Normal) * hitResult.Normal;

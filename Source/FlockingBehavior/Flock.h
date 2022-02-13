@@ -5,8 +5,8 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "Boid.h"
-#include "Octree.h"
 
+#include "Flock.generated.h"
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class FLOCKINGBEHAVIOR_API UFlock : public UActorComponent
@@ -15,21 +15,10 @@ class FLOCKINGBEHAVIOR_API UFlock : public UActorComponent
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flock", meta = (Tooltip = "Total number of boids."))
-	int TotalBoids = 300;
-
-	UFUNCTION()
-	void Initialize(class AActor* boidsOwner, TSubclassOf<class ABoid> boidBPClass);
-
-protected:
-	// Called when the game starts
-	virtual void BeginPlay() override;
-
-public:	
-	// Called every frame
-	void TickComponent(float DeltaTime);
+		int TotalBoids = 300;
 
 private:
-	
+
 	float _awarenessRadiusSquared;
 	float _separationRadiusSquared;
 
@@ -47,13 +36,13 @@ public:
 	UFlock();
 
 	UFUNCTION()
-	void Initialize(class AActor* boidsOwner, TSubclassOf<class ABoid> boidBPClass);
+		void Initialize(class AActor* boidsOwner, TSubclassOf<class ABoid> boidBPClass);
 
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
-public:	
+public:
 	// Called every frame
 	void TickComponent(float DeltaTime);
 };

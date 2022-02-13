@@ -1,9 +1,10 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
+
 #include "Flock.h"
 #include "Kismet/GameplayStatics.h"
 
-// DEFINE_LOG_CATEGORY(FlockingBehaviorLogs)
+//DEFINE_LOG_CATEGORY(FlockingBehaviorLogs)
 
 #define AWARENESS_RADIUS 250.0f
 #define SEPARATION_RADIUS 150.0f
@@ -22,12 +23,12 @@ void UFlock::BeginPlay()
 	Super::BeginPlay();
 }
 
-void UFlock::Initialize(class AActor *boidsOwner, TSubclassOf<class ABoid> boidBPClass)
+void UFlock::Initialize(class AActor* boidsOwner, TSubclassOf<class ABoid> boidBPClass)
 {
 	_boidOwner = boidsOwner;
 	_boidBPClass = boidBPClass;
 
-	UWorld *world = GetWorld();
+	UWorld* world = GetWorld();
 
 	if (world)
 	{
@@ -57,7 +58,7 @@ void UFlock::Initialize(class AActor *boidsOwner, TSubclassOf<class ABoid> boidB
 // Called every frame
 void UFlock::TickComponent(float DeltaTime)
 {
-	for (ABoid *boid : _boids)
+	for (ABoid* boid : _boids)
 	{
 		auto boidPosition = boid->GetTransform().GetLocation();
 
@@ -67,7 +68,7 @@ void UFlock::TickComponent(float DeltaTime)
 		int neighborCount = 0;
 		int separationCount = 0;
 
-		for (ABoid *neighbor : _boids)
+		for (ABoid* neighbor : _boids)
 		{
 			if (boid == neighbor)
 				continue;
