@@ -14,20 +14,15 @@ class FLOCKINGBEHAVIOR_API ABoid : public AActor
 {
 	GENERATED_BODY()
 	
-<<<<<<< HEAD
-public:	
-=======
 public:
->>>>>>> origin/simple-basic-algorithm
 	// Sets default values for this actor's properties
 	ABoid();
 
 	UPROPERTY(VisibleAnywhere, BlueprintreadOnly)
-<<<<<<< HEAD
-	USceneComponent* Scene;
+		USceneComponent* Scene;
 
 	UPROPERTY(VisibleAnywhere, BlueprintreadOnly)
-	UStaticMeshComponent* Mesh;
+		UStaticMeshComponent* Mesh;
 
 	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Boid")
 	//FVector DirectionVector;
@@ -36,44 +31,11 @@ public:
 	float DirectionAngle;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flock", meta = (Tooltip = "Length of Ray cast (in cms) for checking forward collision with World Static objects, so that the boid can turn accordingly."))
-	float FarSightness;
+		float FarSightness;
 
 	////current speed by which each boid moves
 	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Boid")
 	//float Speed;
-
-	//The Speed variable will never cross this limit
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Boid")
-	float MaxSpeed;
-
-	//Steering will never cross this limit
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Boid")
-	float MaxSteeringForce;
-
-	FVector GetDirectionVector();
-
-private:
-
-	//speed * direction vector
-	UPROPERTY()
-	FVector _velocity;
-
-	UPROPERTY()
-	FVector _actorBounds;
-
-	UPROPERTY()
-	UWorld* _world;
-
-	UPROPERTY()
-	FVector _directionVector;
-=======
-		USceneComponent* Scene;
-
-	UPROPERTY(VisibleAnywhere, BlueprintreadOnly)
-		UStaticMeshComponent* Mesh;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flock", meta = (Tooltip = "Length of Ray cast (in cms) for checking forward collision with World Static objects, so that the boid can turn accordingly."))
-		float FarSightness;
 
 	//The Speed variable will never cross this limit
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Boid")
@@ -109,20 +71,17 @@ private:
 
 	UPROPERTY()
 		UWorld* _world;
->>>>>>> origin/simple-basic-algorithm
+
+	UPROPERTY()
+	FVector _directionVector;
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-<<<<<<< HEAD
-public:	
+public:
 	// Called every frame
-	void Tick(float DeltaTime, float alignmentAngle, FVector cohesion, FVector separation);
-
-//  UFUNCTION()
-//     void OnActorOverlap(AActor* SelfActor, AActor* OtherActor, FVector NormalImpulse, const FHitResult& Hit);
-	
+	void Tick(float DeltaTime, FVector alignmentSteering = FVector::ZeroVector, FVector cohesionSteering = FVector::ZeroVector, FVector separationSteering = FVector::ZeroVector);
 };
 
 //USTRUCT()
@@ -132,9 +91,3 @@ public:
 //	FVector Location;
 //	float Distance;
 //};
-=======
-public:
-	// Called every frame
-	void Tick(float DeltaTime, FVector alignmentSteering = FVector::ZeroVector, FVector cohesionSteering = FVector::ZeroVector, FVector separationSteering = FVector::ZeroVector);
-};
->>>>>>> origin/simple-basic-algorithm
