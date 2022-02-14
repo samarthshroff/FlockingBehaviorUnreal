@@ -4,6 +4,7 @@
 #include "GameManager.h"
 #include "Components/InputComponent.h"
 #include "GameFramework/Controller.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 AGameManager::AGameManager()

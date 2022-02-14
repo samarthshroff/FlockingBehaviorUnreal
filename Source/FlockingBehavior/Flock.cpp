@@ -5,7 +5,7 @@
 
 // DEFINE_LOG_CATEGORY(FlockingBehaviorLogs)
 
-#define AWARENESS_RADIUS 250.0f
+#define AWARENESS_RADIUS 200.0f
 #define SEPARATION_RADIUS 150.0f
 
 // Sets default values for this component's properties
@@ -37,7 +37,7 @@ void UFlock::Initialize(class AActor *boidsOwner, TSubclassOf<class ABoid> boidB
 			FString name = "Boid";
 			name.AppendInt(i);
 
-			FTransform transform = FTransform(FVector(FMath::FRandRange(-1000.0f, 1000.0f), FMath::FRandRange(-1000.0f, 1000.0f), FMath::FRandRange(100.0f, 1800.0f)));
+			FTransform transform = FTransform(FVector(FMath::FRandRange(-1900.0f, 1900.0f), FMath::FRandRange(-1900.0f, 1900.0f), FMath::FRandRange(100.0f, 1800.0f)));
 			// need to defer the spawning as we need to set the direction angle before boids BeginPlay is called
 			auto boid = world->SpawnActorDeferred<ABoid>(_boidBPClass, transform, _boidOwner);
 			boid->SetActorLabel(name);
