@@ -14,7 +14,7 @@ class FLOCKINGBEHAVIOR_API UFlock : public UActorComponent
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flock", meta = (Tooltip = "Total number of boids."))
-		int TotalBoids = 300;
+		int TotalBoids = 500;
 private:
 
 	float _awarenessRadiusSquared;

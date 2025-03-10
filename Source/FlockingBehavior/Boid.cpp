@@ -122,6 +122,7 @@ void ABoid::Tick(float DeltaTime, FVector alignmentSteering, FVector cohesionSte
 	
 	_acceleration = FVector::ZeroVector;
 
+	FarSightness = _velocity.Size() + 10.0f;
 	//code for detecting world static obstacles
 	FVector forwardVector = GetActorForwardVector();
 	FVector newVector = FVector(_actorBounds.X * forwardVector.X, _actorBounds.Y * forwardVector.Y, _actorBounds.Z * forwardVector.Z);
@@ -129,7 +130,7 @@ void ABoid::Tick(float DeltaTime, FVector alignmentSteering, FVector cohesionSte
 	FVector end = forwardVector * FarSightness + start;
 	FHitResult hitResult;
 	FCollisionQueryParams collisionParams;
-
+	collisionParams.AddIgnoredActor(this);
 	//DrawDebugLine(GetWorld(),start,end,FColor::Blue,true,-1.0f,0,2.0f);
 	//UE_LOG(FlockingBehaviorLogs,Warning,TEXT("start %s and end is %s "),*(start.ToString()),*(end.ToString()));
 
@@ -137,7 +138,7 @@ void ABoid::Tick(float DeltaTime, FVector alignmentSteering, FVector cohesionSte
 	{		
 		//UE_LOG(FlockingBehaviorLogs,Warning,TEXT("found something*************  "));
 
-		_velocity = _velocity - 2 * (_velocity * hitResult.Normal) * hitResult.Normal;
+		_velocity = _velocity - 2 * (FVector::DotProduct(_velocity, hitResult.Normal)) * hitResult.Normal;
 
 		//calculate the angle by which the boid will turn or rotate. For now just consider that the boid will make a kind of u-turn
 		//We will add the moving around a static object afterwards
